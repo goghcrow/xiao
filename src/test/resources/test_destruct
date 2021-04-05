@@ -1,14 +1,11 @@
-// ======================== destructuring_assignment 解构赋值 ========================
+// destructuring_assignment 解构赋值
 
-
-// 可以用换行分隔属性
 let Color = record {
     mut r :Int = 0
     mut g :Int = 0
     mut b :Int = 0
 }
 
-// 可以可以用逗号分隔, 混合也可以
 let Point = record {
     mut x: Int, mut y: Int
 }

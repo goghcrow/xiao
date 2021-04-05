@@ -17,5 +17,4 @@
     assert add("Hello", "World") == "HelloWorld"
     // 没有匹配到为 Void
     debugger IO.println(add(1, "Str"))
-
 }

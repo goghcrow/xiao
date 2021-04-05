@@ -52,8 +52,6 @@
 }
 
 
-// todo 模式匹配匹配 record 文法有问题
-
 {
     let tuple = ( "subscript", )
     let rec = [ val: "attribute" ]

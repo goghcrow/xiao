@@ -16,13 +16,9 @@ public class Play {
 
     @Test
     public void tmp() {
-        String s = "{\n" +
-                "    infixn :\n" +
-                "    let : = (a: Int, b: Int) => a + b\n" +
-                "    let f = (a : Int, b : Int) => a : b\n" +
-                "    assert f(1, 2) == 3\n" +
-                "}\n";
-        Value eval = typecheck(s);
+        String s = "(a, b) => 42\n" +
+                "(a, b): Int => 42";
+        Value eval = eval(s);
         System.out.println(eval);
 
     }

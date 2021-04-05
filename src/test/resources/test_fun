@@ -6,8 +6,8 @@ fun() { }
 fun() = 42
 fun() = {}
 
-// fun(a) = 42
-// fun(a) = { 42 }
+fun(a) = 42
+fun(a) = { 42 }
 
 fun(a: Int) = 42
 fun(a: Int): Int = 42
@@ -18,7 +18,7 @@ fun(a: Int = 1): Int = 42
 fun(a: Int|Str = 1) = 42
 fun(a: Int|Str = 1): Int = 42
 
-// fun(a, b) = 42
+fun(a, b) = 42
 
 fun(a :Int, b :Str) = 42
 fun(a :Int, b :Str): Int|Str = 42
@@ -44,8 +44,8 @@ fun(mut a: Int) {
 (): Void => { }
 
 // 这种形式不能声明参数与返回值类型,不能有默认值
-// a => 42
-// a => { 42 }
+a => 42
+a => { 42 }
 
 // a => { debugger a = 1 } // 参数默认不可以修改
 
@@ -53,8 +53,8 @@ fun(mut a: Int) {
 // a: Int  => 42
 // a: Int = 1 =>
 
-// (a) => 42
-// (a): Int => 42
+(a) => 42
+(a): Int => 42
 
 (a :Int) => 42
 (a :Int): Int => 42
@@ -65,8 +65,8 @@ fun(mut a: Int) {
 (a :Int | Str = 1) => 42
 (a :Int | Str = 1): Int => 42
 
-// (a, b) => 42
-// (a, b): Int => 42
+(a, b) => 42
+(a, b): Int => 42
 
 (a :Int, b :Str) => 42
 (a :Int, b :Str): Int => 42

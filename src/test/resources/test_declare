@@ -57,7 +57,6 @@ assert mutable_rec.id == 42
 
 
 
-
 // 可以用换行分隔属性
 let Color = record {
     mut r :Int = 0
@@ -72,7 +71,6 @@ let Point = record {
 
 
 // extends 纯粹是简化重复代码, 没有其他任何意义
-
 {
     let Id = record {
         id :Int
