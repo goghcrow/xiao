@@ -1,0 +1,125 @@
+/**********************《测试 函数语法》***********************/
+
+fun() { }
+
+// 函数 body 是简单表达式可以直接写等号
+fun() = 42
+fun() = {}
+
+// fun(a) = 42
+// fun(a) = { 42 }
+
+fun(a: Int) = 42
+fun(a: Int): Int = 42
+
+fun(a: Int = 1) = 42
+fun(a: Int = 1): Int = 42
+
+fun(a: Int|Str = 1) = 42
+fun(a: Int|Str = 1): Int = 42
+
+// fun(a, b) = 42
+
+fun(a :Int, b :Str) = 42
+fun(a :Int, b :Str): Int|Str = 42
+
+fun connect(a :Str, b :Str) = a ++ b
+
+fun(a: Int) {
+    debugger a = 1 // 默认是 immutable
+}(42)
+
+// 参数可修改
+fun(mut a: Int) {
+    a = 1
+}(42)
+
+
+/**********************《测试 箭头函数语法》***********************/
+
+() => 42
+(): Int => 42
+
+() => { }
+(): Void => { }
+
+// 这种形式不能声明参数与返回值类型,不能有默认值
+// a => 42
+// a => { 42 }
+
+// a => { debugger a = 1 } // 参数默认不可以修改
+
+// 注意: 不支持以下语法, 必须大括号
+// a: Int  => 42
+// a: Int = 1 =>
+
+// (a) => 42
+// (a): Int => 42
+
+(a :Int) => 42
+(a :Int): Int => 42
+
+(a :Int = 1) => 42
+(a :Int = 1): Int => 42
+
+(a :Int | Str = 1) => 42
+(a :Int | Str = 1): Int => 42
+
+// (a, b) => 42
+// (a, b): Int => 42
+
+(a :Int, b :Str) => 42
+(a :Int, b :Str): Int => 42
+
+// 可修改参数需要显式声明
+(mut a: Int|Str) => {
+    a = "str"
+    a = 1
+}
+
+// 参数默认值可以根据作用域求值
+{
+    let x = 41
+    let f1 = (a :Int = x + 1) => a
+    assert f1() == 42
+
+    let f2 = (a: Bool) => (v = if a 42 else 0) => v
+    assert f2(true)() == 42
+    assert f2(false)() == 0
+}
+{
+    fun f(a: Bool) {
+        // return 表达式起始字符必须放在 return 后面, 后面可以换行
+        return fun(v = if a 42 else 0) = v
+    }
+    assert f(true)() == 42
+    assert f(false)() == 0
+}
+
+/**********************《测试 调用匿名函数》***********************/
+// todo (a: Int, b: Int) => a + b, 这一部分类型可以推导出来, 不用写
+assert (  (f:(_:Int,_:Int)=>Int, a:Int, b:Int) => f(a, b)  )  ((a: Int, b: Int) => a + b, 1, 2) == 3
+
+
+/**********************《测试 两种调用方式》***********************/
+
+{
+    let f = (a: Int, b: Float) => (a, b)
+    assert f(42, 3.14) == (42, 3.14)
+    assert f(a = 42, b = 3.14) == (42, 3.14)
+}
+
+{
+    let f = (a: Int, b: Float = 3.14) => (a, b)
+    // 传统方式调用函数默认值无作用
+    debugger f(42) == (42, 3.14)
+}
+
+{
+    // 默认值无顺序要求
+    let f1 = (a: Int, b: Float = 3.14) => (a, b)
+    assert f1(a = 42) == (42, 3.14)
+
+    let f2 = (a: Int = 42, b: Float) => (a, b)
+    assert f2(b = 3.14) == (42, 3.14)
+}

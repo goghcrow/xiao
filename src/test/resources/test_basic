@@ -1,0 +1,180 @@
+{
+    let message = "Hello World!"
+    debugger message()
+
+    let user = [ name: "Daniel", age: 26 ]
+    debugger user.location
+
+    // 声明哪怕没调用 也会进行类型检查
+    debugger fun flipCoin_typo() = Math.random < 0.5
+
+    fun flipCoin() = Math.random() < 0.5
+    flipCoin()
+
+    let value = if(Math.random() < 0.5, "a", "b")
+    if value != "a" {
+        "Hello"
+    } else if value == "b" {
+        // todo 推断死代码
+        // Oops, unreachable
+        "World"
+    }
+}
+
+
+
+{
+    // arg type
+    fun greet(name: Str) = Void
+    debugger greet(42)
+
+    // return type
+    fun getFavoriteNumber(): Float = 42
+
+    // record
+    fun printCoord(pt: [ x: Float, y: Float ]) {
+        IO.println("The coordinate's x value is " ++ pt.x)
+        IO.println("The coordinate's y value is " ++ pt.y)
+    }
+    printCoord([ x: 3, y: 7 ])
+}
+
+
+{
+    // union type
+    fun printId(id: Float | Str) {
+      IO.println("Your ID is: " ++ id)
+    }
+    printId(101)
+    printId("202")
+    debugger printId([ myID: 22342 ])
+}
+
+{
+    fun println_float(a: Float) = IO.println(a)
+    fun println_str(a: Str) = IO.println(a)
+
+    debugger println_float("str")
+    debugger println_str(42)
+
+    fun printId(id: Float | Str) {
+        match id {
+            case id: Float -> println_float(id) // id 这里会被标记为 Float 类型
+            case id: Str -> println_str(id) // id 此处会被标记为 Str 类型
+        }
+    }
+
+    printId(42)
+    printId(3.14)
+    printId("Hello")
+}
+
+
+{
+    fun join1(vec: Str[], i: Int, buf: Str): Str {
+        if i == 0 {
+            buf
+        } else {
+            join1(vec, i - 1, vec[i - 1] ++ buf)
+        }
+    }
+
+    fun join(vec: Str[]): Str {
+        import size from Vectors
+        join1(vec, size(vec), "")
+    }
+
+    assert join([]) == ""
+    assert join(["a", "b", "c"]) == "abc"
+
+
+    fun welcomePeople(x: Str[] | Str) {
+        match x {
+            case a: Str[] -> join(a)// Here: 'x' is 'Str[]'
+            case a: Str -> a        // Here: 'x' is 'Str'
+        }
+    }
+
+    assert welcomePeople("xiaofeng") == "xiaofeng"
+    assert welcomePeople(["xiao", "feng"]) == "xiaofeng"
+}
+
+
+{
+    fun slice_vec_of_t(T) = (vec: T[], start: Int, sz: Int): T[] => vec
+    fun slice_str(s: Str, start: Int, sz: Int): Str = s
+
+    // 类型推导为: (Union(Str | Float[]),) → Union(Str | Float[])
+    fun getFirstThree(x: Float[] | Str) {
+        match x {
+            case x: Float[] -> slice_vec_of_t(Float)(x, 0, 3)
+            case x: Str -> slice_str(x, 0, 3)
+        }
+    }
+    assert getFirstThree([3.14])[0] == 3.14
+    assert getFirstThree("Hello") == "Hello"
+}
+
+{
+    import eltType from Types
+    fun slice(a, start: Int, sz: Int)  {
+        match a {
+            case a: eltType(a)[] -> a
+            case a: Str -> a
+        }
+    }
+
+    fun getFirstThree(x: Float[] | Str) {
+        slice(x, 0, 3)
+    }
+    assert getFirstThree([3.14])[0] == 3.14
+    assert getFirstThree("Hello") == "Hello"
+}
+
+
+{
+    let U1 = 1|2|"a"|"b" // 推导为 Int|Str
+    type U2 = 1|2|"a"|"b" // 推导为字面类型 1|2|"a"|"b"
+
+    let f1 = (a: U1) => Void
+    let f2 = (a: U2) => Void
+
+    f1(42)
+    f1("Hello")
+
+    f2(1)
+    f2(2)
+    f2("a")
+    f2("b")
+    debugger f2(42)
+    debugger f2("Hello")
+}
+
+
+{
+    // 类型检查可以推导出来 a 一定是 Int
+    let a: Int = if true || Math.random() > 3.14 {
+        42
+    } else {
+        "Hello"
+    }
+    // b 是 Float
+    let b: Float = if false && Math.random() > 3.14 {
+        "World"
+    } else {
+        3.14
+    }
+}
+
+{
+    type Nothing = ()
+    type Maybe = T => Nothing | T
+    type MaybeInt = Maybe(Int)
+    let test = (a: MaybeInt) =>
+        match a {
+            case i: Int -> IO.println(i)
+            case _: () -> IO.println("Nothing")
+        }
+    test(())
+    test(42)
+}

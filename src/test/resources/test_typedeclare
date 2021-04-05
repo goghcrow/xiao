@@ -1,0 +1,207 @@
+import * from Vectors
+import * from IO
+
+// 用 record 字面量声明类型
+{
+    let f = (point: [x: Int]) => point.x
+    let point1 = [ x: 1 ]
+    let point2 = [ x: 2, y: 3 ]
+    assert f(point1) == 1
+    assert f(point2) == 2
+    let point0 = [:]
+    debugger f(point0)
+}
+
+// 字面类型声明
+{
+    let f = (s: "Hello" | "World") => s
+    assert f("Hello") == "Hello"
+    assert f("World") == "World"
+    debugger f("Str")
+    debugger f(1)
+    debugger f(3.14)
+    let a = "Hello"
+    assert f(a) == a
+}
+
+// 字面类型声明
+{
+    let f = (a): false|42|3.14|"S" => a
+    assert f(false) == false
+    assert f(42) == 42
+    assert f(3.14) == 3.14
+    assert f("S") == "S"
+    debugger f(1)
+    debugger f(1.1)
+    debugger f("")
+    debugger f(true)
+}
+
+// 字面类型声明
+{
+    let mut a: 42|3.14 = 42
+    a = 3.14
+    debugger a = 1
+    debugger a = 1.1
+    debugger a = "s"
+}
+
+
+{
+    //   ) = {
+    // 以下几种情况的表达式读取遇到= => 停止
+
+    let x: Int|Str = "x"
+    let f1 = fun() : Int|Str { "f1" }
+    let f2 = fun(a: Int|Str) : Int|Str { "f2" }
+    let f3 = fun(a: Int|Str, b: Int|Str) : Int|Str { "f3" }
+    let f4 = fun(a: Int|Str, b: Int|Str) : Int|Str = { 4 }
+    let f5 = (a: Int|Str) : Int|Str => { 5 }
+    let f6 = (a: Int|Str, b: Int|Str) : Int|Str => { "f6" }
+
+
+    match x {
+        case x: Str -> assert x == "x"
+        case _ -> assert false
+    }
+    match f1() {
+        case v: Str -> v == "f1"
+        case _ -> assert false
+    }
+    match f2(1) {
+        case v: Str -> assert v == "f2"
+        case _ -> assert false
+    }
+    match f3(1, "") {
+        case v: Str -> v == "f3"
+        case _ -> assert false
+    }
+    match f4("", 1) {
+        case v: Int -> assert v == 4
+        case _ -> assert false
+    }
+    match f5(1) {
+        case v: Int -> assert v == 5
+        case _ -> assert false
+    }
+    match f6("", "") {
+        case v: Str -> assert v == "f6"
+        case _ -> assert false
+    }
+}
+
+
+
+{
+    let f1 = (): (Int,) => (42, )
+    let f2 = (): (Int,Str) => (42, "str")
+    let (a, ) = f1()
+    let (b, c) = f2()
+
+    assert a == 42 && b == 42 && c == "str"
+
+    // todo 支持
+    // let f111 = (): ((a: Int, b:Str) => (Int, Str)) => (a, b) => (42, "Hello World")
+
+
+    // 声明返回 fun 的 fun
+    // 字面量声明返回值类型需要括号，否则会有歧义
+    let f3 = (): ((a: Int, b:Str) => (Int, Str)) => (a: Int, b: Str) => (42, "Hello World")
+    assert f3()(1, "str") == (42, "Hello World")
+    debugger f3()(1.1, "str")
+    debugger f3()(1, 3.14)
+
+    let f4: (a: Int, b:Str) => (Int, Str)
+        = (a: Int, b: Str) => (42, "Hello World")
+    assert f4(1, "str") == (42, "Hello World")
+    debugger f4(1.1, "str")
+    debugger f4(1, 3.14)
+}
+
+
+{
+    let Void2Str = () => Str
+    let Int2Str = (a: Int) => Str
+
+    // 函数作为返回值
+    let f1 = (): Int2Str => (i = 1) => "str"
+    assert f1()() == "str"
+    let f2 = (): Int2Str => (i: Int) => "str"
+    assert f2()(42) == "str"
+
+    let f3 = (): (a: Int) => Str => (i: Int) => "str"
+    let f4 = (): ((a: Int) => Str) => (i: Int) => "str"
+
+    assert f3()(1) == "str"
+    assert f4()(42) == "str"
+
+    // 函数作为参数
+    let f5 = (f: Int2Str, i: Int) => f(i)
+    assert f5( (i: Int)=>"str", 42) == "str"
+
+    // 函数字面量类型作为参数
+    let f6 = (f: (a: Int) => Str, i: Int) => f(i)
+    assert f6( (i: Int)=>"str", 42) == "str"
+}
+
+
+// todo 有歧义的需要加括号
+(): (a: Int) => Str => (i: Int) => "str"
+(): ((a:Int,b:Int)=>Int, (a:Int,b:Int)=>Int) => ((a:Int,b:Int)=>1, (a:Int,b:Int)=>2)
+(): ((a: Int, b:Str) => (Int, Str)) => (a: Int, b: Str) => (42, "Hello World")
+
+fun(i: Int, s: Str) = Int
+(): (Int, Int) => (Int, Int)
+
+
+{
+    let A1 = record {
+        a: Float
+    }
+    let A2 = record {
+        a: Int
+    }
+    let f = (arg: A1) => arg
+    f( A2(a=1) )
+    f( A1(a=1) )
+}
+
+
+{
+    let f = (t: (Float,)) => t[0]
+    assert f((42,)) == 42
+    assert f((3.14,)) == 3.14
+
+    // tuple 只读, 参数只读, 所以 t[0] 能推断为实际参数的类型
+    // let f = (t: (Float,)) => t[0] = 3.14 // tuple 只读
+
+    // vector 能修改, 但是 vector  不变, 所有 Int[] 不是 Float[] 子类型
+    let f1 = (t: Float[]) => t[0] = 3.14
+
+    let f2 = (t: Float[]) => t[0]
+    debugger f2([42]) == 42
+    assert f2([3.14]) == 3.14
+}
+
+
+
+{
+    let A = record { name: Float }
+    let B = record { mut name: Int}
+    debugger let f = (a: A) => a.name = 42
+    // f(B(42))
+}
+{
+    let A = record { mut name: Float }
+    let B = record { name: Int}
+    let f = (a: A) => a.name = 42
+    debugger f(B(42))
+}
+
+
+{
+    type ID = record { id: 42 }
+    let f = (id: ID) => id
+    f([id: 42, name: "xiao"])
+    debugger f([id: 1, name: "xiao"])
+}

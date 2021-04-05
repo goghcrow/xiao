@@ -1,0 +1,12 @@
+
+// as 字面类型
+
+let f = (mut a: 42 | "42") => a
+debugger f(42) + 1
+
+assert (f(42) as 42) + 1 == 43
+assert (f("42") as "42") ++ "0" == "420"
+
+
+// 测试字面类型
+if true as true {} else {}

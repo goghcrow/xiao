@@ -1,0 +1,253 @@
+
+{
+    // 抄了点 ts 文档的用例
+
+    let mut x: "hello" = "hello"
+    // OK
+    x = "hello"
+    debugger x = "howdy"
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    let mut mutable_str = "str" // 推导成 Str
+    let immutable_str = "str"   // 推导成 字面类型 "str"
+    {
+        fun f1(a: immutable_str) = a
+        fun f2(a: "str") = a
+
+        f1(immutable_str)
+        f2(immutable_str)
+
+        // 这里应该报错的, 但是不报错貌似也没问题
+        // PatternDefineChecker.java  Literal.clear() 取消注释 就可以了
+        f1(mutable_str)
+        f2(mutable_str)
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    fun printText(s: Str, alignment: "left" | "right" | "center") {}
+    printText("Hello, world", "left")
+    debugger printText("G'day, mate", "centre")
+
+
+    fun compare(a: Str, b: Str): -1 | 0 | 1 = if(a == b, 0, if(a > b, 1, -1))
+    assert compare("a", "a") == 0
+    assert compare("a", "b") == -1
+    assert compare("b", "a") == 1
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    let Num = Int | Float
+    record Options {
+      width: Num
+    }
+
+    fun configure(x: Options | "auto") {}
+    configure([ width: 100 ])
+    configure("auto")
+    debugger configure("automatic")
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    fun handleRequest(url: Str, method: "GET"|"POST") {}
+    debugger handleRequest("", "PUT")
+
+    let req = [ url: "https://example.com", method: "GET" ]
+    handleRequest(req.url, req.method)
+
+    let req1 = [ url: "https://example.com", mut method: "GET" ]
+    debugger handleRequest(req1.url, req1.method)
+
+    let req2 = record { url: Str = "https://example.com", method: "GET"|"POST" = "GET" } ()
+    handleRequest(req2.url, req2.method)
+
+
+    {
+        fun req(method: "GET"|"POST") {}
+        let conf = [method: "GET"]
+        req(conf.method) // method 不能被修改, 通过
+    }
+
+    {
+        fun req(method: "GET"|"POST") {}
+        let conf = [mut method: "GET"] // 这里 mut, method 被推导为 Str
+        debugger req(conf.method) // 所以这里类型检查不通过
+    }
+
+    {
+        fun req(method: "GET"|"POST") {}
+        let conf = [mut method: "GET"]
+        conf.method = "POST" // assign 不会变更 method 类型
+        debugger req(conf.method) // 不通过
+    }
+
+    {
+        fun req(method: "GET"|"POST") {}
+        let conf = [mut method: "GET"] // 这里 mut, method 被推导为 Str
+        req(conf.method as "GET") // 可以这么解决, Str cast 成 "GET" 字面类型
+    }
+
+    {
+        record Req {
+            url: Str = "https://example.com"
+            mut method: Str = "GET"
+        }
+        let req = Req()
+        debugger handleRequest(req.url, req.method)
+    }
+
+    {
+        record Req {
+            url: Str = "https://example.com"
+            mut method: "GET"|"POST" = "GET"
+        }
+        let req = Req()
+        debugger req.method = "PUT"
+        // 这里 method 虽然是 mut, 但是怎么被 assign 都是 GET|POST, 所以类型检查通过
+        handleRequest(req.url, req.method)
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+}
+
+
+
+
+{
+    // 注意这里必须用 type 声明
+    // let CardinalDirection = "North" | "East" | "South" | "West" // 会被推导成 Str
+    type CardinalDirection = "North" | "East" | "South" | "West"
+    fun move(distance: Float, direction: CardinalDirection) = Void
+    move(1,"North")
+    move(1,"East")
+    move(1,"South")
+    move(1,"West")
+    debugger move(1,"Nurth")
+
+    type OneToFive = 1 | 2 | 3 | 4 | 5
+    type Bools = true | false
+}
+
+
+
+
+
+{
+    type Sex = "male" | "female"
+    let f = (s: Sex) => s
+    f("male")
+    f("female")
+    debugger f("hello")
+    debugger f(1)
+}
+
+{
+    type A = record {
+        a: Int
+        b: 42|3.14
+    }
+    A(a=1, b=42)
+    A(a=1, b=3.14)
+    debugger A(a=1, b=1)
+    debugger A(a=1, b=1.1)
+    debugger A(a=1, b="s")
+}
+
+{
+    type T = (42, "xiao")
+    let f = (t: T) => t
+    f(t = (42, "xiao"))
+    debugger f(t = (1, "xiao"))
+}
+
+{
+    type T = ((1, true), (2, false))
+    let f = (t: T) => t
+    f(t = ((1, true), (2, false)))
+    debugger f(t = ((2, true), (2, false)))
+    debugger f(t = ((1, true), (1, false)))
+}
+
+
+{
+    {
+        // 参数协变
+        let a: ((a: Int) => Int, ) = ((a: Float) => Int,)
+        let b: ((a: Int) => Int, ) = a
+    }
+
+
+    {
+        // 返回值逆变
+        let a: ((a: Int) => Float, ) = ((a: Int) => Int,)
+        let b: ((a: Int) => Float, ) = a
+    }
+
+    let a: ((a: Int) => Float, ) = ((a: Float) => Int,)
+    let b: ((a: Int) => Float, ) = a
+}
+
+
+/*
+
+{
+    // subtype 通过比较 value 递归比较基础类型的 literal
+    {
+        type T = (1, )
+        debugger let t: T = Int
+        debugger let t: T = (2, )
+        let t: T = (1, )
+    }
+
+    // todo  数组内部字面量类型是啥意思???
+
+    // [42, 3.14] 这个会类型推导为 Float#3.14, 因为 42 和 3.14 都不是字面类型, union 时候会忽略
+
+    {
+        type T = [42]
+        debugger let t: T = [1]
+        let t: T = [42]
+        debugger let tt: T = [42, 3.14]
+    }
+
+    {
+        type T = [a: 1]
+        debugger let t: T = [a: 2]
+        debugger let t: T = [b: 1]
+        let t: T = [a: 1]
+        let tt: T = [a:1, b:2]
+        assert tt.b == 2
+    }
+
+    {
+        type T = [(1,), [id:42]]
+        // debugger let t: T = [] // todo 空数组遇到字面类型处理错误!!!
+
+        debugger let t: T = [(1,)]
+        debugger let t: T = [[id: 42]]
+        debugger let t: T = [(2,), [id:42]]
+        debugger let t: T = [(1,), [id:1]]
+
+        let t: T = [(1,), [id:42]]
+    }
+}
+
+
+// todo 字面量类型 union  的等于和 cast 怎么弄
+
+let a: 1|3.14 = 1
+if a == 1{} else {}
+let a: 1|3.14 = 3.14
+a as 3.14
+
+
+
+type T = [(1,), [id:42]]
+debugger let t: T = []
+
+let a: ((a: Int) => Int)[] = []
+debugger let b: ((a: Float) => Int)[] = a
+
+let a: ((a: Float) => Int, ) = ((a: Int) => a)
+let b: ((a: Int) => Int, ) = a
+*/

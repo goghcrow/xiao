@@ -1,0 +1,17 @@
+// if 函数 if(test, then, else)
+// 求值策略特殊 其中 then 和 else 会按照 test 结果进行求值
+
+// todo 用类型名称可以绕过类型检查 !!! BUG, 目前只处理了 Bool  typecheck.boolAssert
+// if(Bool, 42, 3.14)
+
+let f = (test: Bool) => if (test, 42, "Hello")
+
+assert f(true) == 42
+assert f(false) == "Hello"
+
+{
+    let mut i: Int = 0
+    let r = if(true, 1, {  i = i + 1  "str" })
+    // 等同于 if true { 1 } else { i = i + 1 "str" }
+    assert r == 1 && i == 0
+}

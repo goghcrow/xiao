@@ -1,0 +1,186 @@
+// ======================== destructuring_assignment 解构赋值 ========================
+
+
+// 可以用换行分隔属性
+let Color = record {
+    mut r :Int = 0
+    mut g :Int = 0
+    mut b :Int = 0
+}
+
+// 可以可以用逗号分隔, 混合也可以
+let Point = record {
+    mut x: Int, mut y: Int
+}
+
+
+/**********************《测试 绑定&赋值&解构》***********************/
+
+// basic
+{
+    let immutable = 1
+    let mut a = 1
+    let mut b = 2
+
+    // assign
+    (a, b) = (3, 4)
+    assert a == 3 && b == 4
+
+    // define
+    let (c, d) = (a, b)
+    assert c == 3 && d == 4
+
+    // 通过tuple解构来swap变量值
+    let mut x = 1
+    let mut y = -1
+    (y, x) = (x, y)
+    assert x == -1 && y == 1
+}
+
+// tuple 解构
+{
+    let (a, b, c) = (1, 2, 3)
+    assert a == 1 && b == 2 && c == 3
+
+    let (d,,e) = (1,2,3)
+    assert d == 1 && e == 3
+
+    // 通配符可以忽略位置
+    let (f,_,g) = (1,2,3)
+    assert d == f && g == 3
+
+    // ~注意~
+    // 报错：绑定 tuple 数量不匹配: pattern 数量 2, value 数量 3
+    // let (x, y) = (1, 2, 3)
+    // 现在改成非严格模式匹配了, 不用匹配数量了
+    let (h,) = (1,2,3)
+    assert h == 1
+
+    let () = ()
+
+    // 支持嵌套
+    let (x, (y, (z,))) = (1, (2, (3,)))
+    assert x == 1 && y == 2 && z == 3
+}
+
+// record 解构
+{
+    // 声明：r1 绑定到 100
+    let [r: r1] = Color(r=100, g=200, b=255)
+    assert r1 == 100
+    debugger r1 = 200 // 不可修改
+
+    // 声明：可修改
+    let mut [g: g1] = Color(r=100, g=200, b=255)
+    assert g1 == 200
+    g1 = 0
+    assert g1 == 0
+
+    let [r:r] = Color(r=100)
+    assert r == 100
+
+    {
+        // 因为绑定和赋值采用非严格匹配, 忽略数量相等, 所以通配符，没什么用
+        let [r:r, _:_, b:b] = Color(r=100, g=200, b=255)
+        assert r == 100 && b == 255
+    }
+
+    // 赋值
+    let mut b1 = 0
+    [b: b1] = Color(b=42)
+    assert b1 == 42
+}
+
+// 赋值：属性访问
+{
+    let P = Point
+    let p = P(x=1, y=2)
+    (p.x, p.y) = (3, 4)
+    assert p.x == 3 && p.y == 4
+}
+
+// 赋值：下标访问
+{
+    let v = [0, 0]
+    (v[0], v[1]) = (3, 4)
+    assert v[0] == 3 && v[1] == 4
+}
+
+// 混合支持
+{
+    let p = Point(x=1, y=2)
+    let v = [0, 0]
+    let mut x = 0
+    (x, p.x, v[0]) = (1, 2, 3)
+    assert x == 1 && p.x == 2 && v[0] == 3
+}
+
+{
+    // 决定不支持
+
+    // 混合 assign 与 bind, id 绑定遇到下标与属性访问时，下标与属性访问不受 mut 控制进行赋值,
+    // 是否能赋值成功取决于 属性与 tuple 内部元素是否是 mut 的, 比如 mutable tuple
+    // let p = Point(x=1, y=2)
+    // let v = (0, 0)
+    // let (x, p.x, v[0]) = (1, 2, 3)
+    // assert x == 1 && p.x == 2 && v[0] == 3
+}
+
+// record 解构
+{
+    // 声明
+    // mut 表示被解构的变量都是 mut 的，这里指 r、g、b 三个变量 mut
+    // 可以考虑独立控制, 但是貌似没有必要, 可以 再 let 一次，比如 let immu_r = r
+    let mut ([r:r], [g:g], [b:b]) = (Color(r=255), Color(g=255), Color(b=255))
+    assert r == 255 && g == 255 && b == 255
+
+    // 赋值
+    ([r:r], [g:g], [b:b]) = (Color(r=1), Color(g=2), Color(b=3))
+    assert r == 1 && g == 2 && b == 3
+}
+
+// 综合的例子
+{
+    let attr = [
+        mut id: 1
+        tags: [""]
+    ]
+
+    let doc = [
+        ver: 1.1
+        id: 42
+        title: "Hello World!"
+        translations: [
+            [
+                locale: ""
+                localization_tags: ("tag1",)
+                url: "/ch/docs"
+                title: "你好，世界！"
+            ]
+        ]
+        url: "/en-US/docs"
+    ]
+
+    let [
+        ver: ver
+        // id: attr.id // 取消声明时 attr 与 subs 的支持
+        title: englishTitle
+        translations: [
+            [
+                title: localeTitle
+                // localization_tags: (attr.tags[0],) // 取消声明时 attr 与 subs 的支持
+            ],
+        ]
+    ] = doc
+    assert ver == 1.1 && englishTitle == "Hello World!" && localeTitle == "你好，世界！"
+
+    [
+        id: attr.id // 取消声明时 attr 与 subs 的支持
+        translations: [
+            [
+                localization_tags: (attr.tags[0],) // 取消声明时 attr 与 subs 的支持
+            ],
+        ]
+    ] = doc
+    assert attr.id == 42 && attr.tags[0] == "tag1"
+}

@@ -1,0 +1,171 @@
+{
+    // T <: Any
+    // 任何类型(包括 Any 自己)都是 Any 的子类型
+    // ============
+
+    let i = 42
+    let f = 3.14
+    let t = [i, f]
+    let r1 = [:]
+    let r2 = [a:1, b:2]
+    let c = () => {}
+
+    let ai: Any = i
+    let af: Any = f
+    let at: Any = t
+    let ar1: Any = r1
+    let ar2: Any = r2
+    let ac: Any = c
+    let ii: Int = ai // immutable 的字段类型安全
+
+    // Any <: Any 自反性
+    let any: Any = 1
+    let any1: Any = any
+}
+
+{
+    // Int <: Float
+    // int 是 float 的子类型
+    // ============
+
+    let i: Int  = 42
+    let f: Float = i
+    let ii: Int = f // immutable 的字段类型安全
+}
+
+{
+    let TupleInt = (Int,)
+    let TupleFloat = (Float,)
+    let a : TupleInt = (1,)
+    let b : TupleFloat = a // (Int,) <: (Float,)  所以能赋值
+    // 如果 tuple 可以修改则
+    // 则 这个类型检查能通过 但是 b[0] = 3.14 实际类型错误
+    // 不应该是协变的
+    // 因为 Vector 可以修改, 所以 Vector 设计成不变
+}
+
+{
+    // ∵ T1 <: T2, S1 <: S2
+    // ∴ (T1, T2) <: (S1, S2)
+    // tuple 类型协变，需要数量一致, 且两边每个对应的元素都满足子类型关系
+    // ============
+
+    let t1: (Int, Int) = (1, 1)
+    let t2: (Int, Int) = t1
+    let t3: (Int, Float) = t1
+    let t4: (Float, Int) = t1
+    let t5: (Float, Float) = t1
+
+    let t6: (Float, Int) = t5  // immutable 的字段类型安全
+    let t7: (Int, Float) = t5  // immutable 的字段类型安全
+    let t8: (Int, Int) = t5  // immutable 的字段类型安全
+    let t9: (Float, Float) = t5
+
+    let tt1: ((Int, Int), (Int, Int)) = ((1,1), (2,2))
+    let tt2: ((Int, Int), (Int, Int)) = tt1
+    let tt3: ((Int, Float), (Int, Int)) = tt1
+    let tt4: ((Int, Float), (Int, Float)) = tt3
+    let tt5: ((Float, Float), (Int, Int)) = tt1
+    let tt6: ((Float, Float), (Float, Float)) = tt5
+
+    let triple: (Int, Int, Int) = (1, 1, 1)
+    let triple11: (Float, Int, Int) = triple
+    let triple12: (Int, Float, Int) = triple
+    let triple13: (Int, Int, Float) = triple
+    let triple2: (Float, Float, Int) = triple
+    let triple3: (Float, Float, Float) = triple
+}
+
+{
+    // union <: T
+    // union 类型的子类型必须满足 union 的每个元素都是 T 的子类型
+    // ============
+
+    let s1: Int|Str = 1
+    let s2: Float|Str = s1
+
+    let u1: Int|(Int,) = (1,)
+    let u2: Float|(Float,) = u1
+
+    let n1: Int|Float = 3.14
+    let n2: Float = 3.14
+
+    let t1: (Int,)|(Float,) = (3.14,)
+    let t2: (Float,) = t1
+
+    let a: (Int, Float) | (Float, Int) = (1, 3.14)
+    let b: (Float, Float) = a
+    let c: (Int, Float) = a  // immutable 的字段类型安全
+    debugger let d: (Float, Int) = a // 类型检查失败
+}
+
+{
+    // T <: union
+    // T 必须满足是 union 任意元素的子类型
+    // ============
+    let u1: Int = 42
+    let u2: Int|Str = u1
+
+    let a: (Int, Str) = (1, "Hello")
+    let b: (Int, Int) = (1, 2)
+    let c: (Int, Str) | (Float, Float) = a
+    let d: (Int, Str) | (Int, Int) = b
+    let e: (Float, Str) | (Float, Float) = a
+    let f: (Float, Str) | (Float, Float) = b
+}
+
+{
+    // vec <: vec
+    // ============
+
+
+// todo.........
+
+}
+
+{
+    // record <: record
+    // ============
+
+
+// todo.........
+// 宽度子类型
+{
+    record Point1 { x:Int }
+    record Point2 { x:Int, y:Int }
+    let f = fun(p: Point1) = p.x
+    assert f(Point1(x=1)) == 1
+    assert f(Point2(x=2, y=3)) == 2
+}
+
+// 深度子类型
+
+// mut
+
+
+// mixed
+
+}
+
+
+{
+    // funtype <: funtype
+    // ============
+
+
+// todo.........
+
+
+    {
+        let f1      = (a : Float) : Int => 1
+        let mut f2  = (a : Int) : Float => 3.14
+        f2 = f1
+    }
+    {
+            fun f1(a : Float) : Int = 1
+            fun f2(a : Int) : Float = 3.14
+            let mut f3 = f2
+            f3 = f1
+            IO.println("~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    }
+}

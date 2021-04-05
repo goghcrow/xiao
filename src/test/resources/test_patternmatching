@@ -1,0 +1,105 @@
+
+/**********************《测试 模式匹配》***********************/
+
+{
+    let tuple_len = tuple => match tuple {
+        case () -> 0
+        // 数量为 1, 绑定到 a
+        case (a,) -> a
+        // 数量为 2, 绑定到 a b
+        case (a, b) -> a + b
+        // 数量为 3, 绑定到 a c
+        case (a, _, c) -> a + c
+        case _ -> -1
+    }
+    assert tuple_len(()) == 0
+    assert tuple_len((1,)) == 1
+    assert tuple_len((1, 2)) == 3
+    assert tuple_len((1, 2, 3)) == 4
+    assert tuple_len((1, 2, 3, 4)) == -1
+}
+
+{
+    let rec_sz = rec => match rec {
+        case [:] -> 0
+        // 数量为 1，为 a, 且绑定到 a
+        case [a:a] -> a
+        // 数量为 2, 为 a、b,且绑定到 a、b
+        case [a:a, b:b] -> a + b
+        // 数量为 3, 包含 a、c, 且绑定到 a、c
+        case [a:a, _:_, c:c] -> a + c // todo ???
+        case _ -> -1
+    }
+    IO.println(rec_sz([a: 1]))
+    IO.println("_-------------------------------------")
+    assert rec_sz([:]) == 0
+    assert rec_sz([a: 1]) == 1
+    assert rec_sz([a: 1, b: 2]) == 3
+    assert rec_sz([a: 1, b: 2, c: 3]) == 4
+    assert rec_sz([a: 1, b: 2, c: 3, d: 4]) == -1
+}
+
+{
+    // guard 语句
+    let test = tuple => match tuple {
+        case (a, b) if a > b -> 1
+        case (a, b) if a == b -> 0
+        case (a, b) if a < b -> -1
+    }
+    assert test((2, 1)) == 1
+    assert test((1, 1)) == 0
+    assert test((1, 2)) == -1
+}
+
+
+// todo 模式匹配匹配 record 文法有问题
+
+{
+    let tuple = ( "subscript", )
+    let rec = [ val: "attribute" ]
+    let a = 100
+
+    fun test(val) = match val {
+        case 1 -> 42                // int 字面量
+        case 42.0 -> 1.0            // float 字面量
+        case "hello" -> "world"     // str 字面量
+        case () -> "empty tuple"      // empty tuple
+        case [:] -> "empty rec"      // empty record
+        case (3.14, _, a) -> a      // tuple + wildcards + bind
+        case [id:1, val:val] -> val     // record + bind
+        case 1 + a -> a             // expr
+        case tuple[0] -> tuple[0]       // 这里 tuple[0] 与 rec.val 当成表达式执行, 没有当成 bind
+        case rec.val -> rec.val
+        case ("tuple", tuple[0]) -> tuple[0]
+        case (tuple[0], rec.val) -> "x"
+        case [a:tuple[0], b:rec.val] -> "y"
+        case ("x+y", x, y) -> x + y // id bind
+        // case v -> v              // 这里会永远匹配, 不会走到_ 位置
+        case _ -> "default"         // wildcards
+    }
+
+    assert test(1) == 42
+    assert test(42.0) == 1.0
+    assert test("hello") == "world"
+    assert test(("x+y", 1, 2)) == 3
+    assert test(()) == "empty tuple"
+    assert test((3.14,)) == "default"
+    assert test((3.14, 1)) == "default"
+    assert test((3.14, 1, 42)) == 42
+    assert test([:]) == "empty rec"
+    // assert test([id:1, val:42]) == 42 // todo
+    assert test([id:2, val:42]) == "default"
+    assert test([id:1]) == "default"
+    assert test(101) == a
+
+    assert test(("tuple", tuple[0])) == tuple[0]
+    assert test(("tuple", 1)) == "default"
+
+    // assert test(["tuple", tuple[0]]) == tuple[0] // todo
+    assert test(["tuple", 1]) == "default"
+
+    assert test(tuple[0]) == tuple[0]
+    assert test(rec.val) == rec.val
+    assert test((tuple[0], rec.val)) == "x"
+    assert test([a: tuple[0], b: rec.val]) == "y"
+}

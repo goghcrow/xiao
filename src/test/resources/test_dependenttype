@@ -1,0 +1,89 @@
+// 依赖类型
+{
+    let isSingleton = (b: Bool) => if(b, Int, Int[])
+    // 当然这个返回类型省略也可以
+    fun mkSingle (x : Bool): isSingleton(x) {
+        match x {
+            case true -> 0
+            case false -> []
+        }
+    }
+    assert mkSingle(true) == 0
+    assert Vectors.size(mkSingle(false)) == 0
+}
+
+
+// 依赖类型
+{
+    fun validate(a: Bool) = if a { Int } else { Str }
+
+    fun answer(a: Bool, b: validate(a)) = b
+
+    assert answer(true, 42) == 42
+    assert answer(true, 1) == 1
+    assert answer(false, "Hello") == "Hello"
+    assert answer(false, "World") == "World"
+
+    debugger answer(true, "Hi")
+    debugger answer(false, 42)
+}
+
+
+// 依赖类型
+{
+    // 字面类型
+
+    type Answer = 42
+    type Question = "???"
+
+    fun validate(a: Bool) = if a { Answer } else { Question }
+
+    fun answer(a: Bool, b: validate(a)) = b
+
+    assert answer(true, 42) == 42
+    assert answer(false, "???") == "???"
+
+    debugger answer(true, 1)
+    debugger answer(false, 42)
+    debugger answer(true, "???")
+    debugger answer(false, "hello")
+}
+
+// 依赖类型
+{
+    import size from Vectors
+
+    // 返回类型声明
+    fun boundedCheck(v: Int[], i: Int) {
+        if i >= 0 && i < size(v) {
+            Int
+        } else {
+            Void
+        }
+    }
+
+    fun idx(v: Int[], i: Int): boundedCheck(v, i) = v[i]
+
+    // 动态长度数组类型编译期越界检查
+    assert idx([42], 0) + 1 == 43
+    assert idx([0, 42], 1) + 1 == 43
+
+    // 根据 returnType 类型检查阶段发现数组越界
+    // 返回值类型错误, 声明 (), 实际是 Int
+    debugger idx([], 0)
+    debugger idx([], 1)
+    debugger idx([42], 1)
+
+    // 动态长度数组类型编译期越界检查
+
+    let vec = if Math.random() > 0.5 { [] as Int[] } else { [1, 2, 3] }
+    // 动态数组返回类型 ()|Int
+    // v[i]: Int    <:    ()|Int, 类型检查通过, 但是运行时可能报错
+    // idx(vec, 1)
+}
+
+
+
+// todo bug
+// if Math.random() > 3.14 { [] } else { [1, 2, 3] }
+// [] | [42] // union unknown[] int[]  结果不对

@@ -1,0 +1,259 @@
+{
+    fun PairOf(T) =
+        record Pair {
+            car: T
+            cdr: Pair|() = ()
+        }
+
+    let Node = PairOf(Int)
+
+    fun sum(n: Node): Int {
+        n.car + match n.cdr {
+            case a: () -> 0
+            case a: Node -> sum(a)
+        }
+    }
+
+    let lst = Node(car = 1, cdr = Node(car = 2, cdr = Node(car = 3)))
+    assert sum(lst) == 6
+}
+
+
+{
+    fun NodeOf(T) {
+        fun(sumTwo: (a: T, b: T) => T, init: T) {
+            module {
+                record Pair {
+                    car: T
+                    cdr: Pair|() = ()
+                }
+
+                fun sum(n: Pair): T {
+                    sumTwo(n.car, match n.cdr {
+                            case a: () -> init
+                            case a: Pair -> sum(a)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    {
+        // `+`  (a: Int, b: Int) => a + b
+        import Pair as Node, sum from NodeOf(Int)(`+`, 0)
+        let lst = Node(car = 1, cdr = Node(car = 2, cdr = Node(car = 3)))
+        assert sum(lst) == 6
+
+        debugger sum(Node(car = "str"))
+    }
+
+    {
+        // `++` (a: Str, b: Str) => a ++ b
+        import Pair as Node, sum from NodeOf(Str)(`++`, "")
+        let lst = Node(car = "A", cdr = Node(car = "B", cdr = Node(car = "C")))
+        assert sum(lst) == "ABC"
+
+        debugger sum(Node(car = 1))
+    }
+}
+
+{
+    fun ListOf(T) {
+        record Node {
+            mut val: T
+            mut next: Node|() = ()
+        }
+
+        record List {
+            mut root: Node|() = ()
+        }
+
+        fun append1(node: Node, val: T): Void {
+            match node.next {
+                case n: () -> node.next = Node(val)
+                case n: Node -> append1(n, val)
+            }
+        }
+
+        fun each1(node: Node, f: (v: T) => Void): Void {
+            f(node.val)
+            match node.next {
+                case n: Node -> each1(n, f)
+            }
+        }
+
+        fun size1(node: Node): Int {
+            match node.next {
+                case n: () -> 1
+                case n: Node -> 1 + size1(n)
+            }
+        }
+
+        module {
+            let new = () => List()
+            let size =  (lst: List) =>
+                match lst.root {
+                    case n: () -> 0
+                    case n: Node -> size1(n)
+                }
+            let append = (lst: List, val: T) =>
+                match lst.root {
+                    case n: () -> lst.root = Node(val)
+                    case n: Node -> append1(n, val)
+                },
+            let each = (lst: List, f: (v: T) => Void) =>
+                match lst.root {
+                    case n: () -> Void
+                    case n: Node -> each1(n, f)
+                }
+        }
+    }
+
+    import new as newList, * from ListOf(Str)
+
+    let lst = newList()
+    assert size(lst) == 0
+
+    append(lst, "Hello")
+    assert size(lst) == 1
+
+    append(lst, "World")
+    assert size(lst) == 2
+
+    each(lst, v => IO.println(v))
+    each(lst, IO.println)
+
+    debugger append(lst, 1)
+    debugger append(lst, 3.14)
+}
+
+
+// !!! 比上面 ListOf 的声明方式靠谱
+{
+    letrec (List, Node) = (
+        Node | (),
+        record {
+            next: List
+        }
+    )
+
+    fun size(lst: List): Int {
+        match lst {
+            case a: () -> 0
+            case a: Node -> 1 + size(a.next)
+        }
+    }
+
+    assert size(()) == 0
+    assert size(Node(next = ())) == 1
+    assert size(Node(next = Node(next = ()))) == 2
+}
+
+
+
+// immutable 结构
+{
+    fun ListOf(T) {
+        module {
+            letrec (List, Node) = (
+                Node|(),
+                record {
+                    val: T
+                    next: List = ()
+                }
+            )
+
+            fun append(lst: List, val: T): Node {
+                match lst {
+                    case n: () -> Node(val)
+                    case n: Node -> Node(val, n)
+                }
+            }
+
+            fun size(lst: List): Int {
+                match lst {
+                    case n: () -> 0
+                    case n: Node -> 1 + size(n.next)
+                }
+            }
+
+            fun each(lst: List, f: (v: T) => Void): Void {
+                match lst {
+                    case n: () -> Void
+                    case n: Node -> {
+                        f(n.val)
+                        each(n.next, f)
+                    }
+                }
+            }
+
+            fun foldr(lst: List, f: (v: T, carry: T) => T, init: T): T {
+                match lst {
+                    case n: () -> init
+                    case n: Node -> f(n.val, foldr(n.next, f, init))
+                }
+            }
+        }
+    }
+
+    import append as cons, * from ListOf(Str)
+
+    assert size(()) == 0
+
+    debugger cons((), 42)
+    debugger cons((), 3.14)
+
+    let lst = cons((), "!"),
+    assert size(lst) == 1
+
+    let lst1 = cons(lst, "World")
+    assert size(lst1) == 2
+
+    let lst2 = cons(lst1, "Hello")
+    assert size(lst2) == 3
+
+    each(lst2, IO.print) // HelloWorld!
+
+    // (Hello, (World, (!, )))
+    assert foldr(lst2, `++`, "") == "HelloWorld!"
+}
+
+
+
+
+{
+    /*
+    record Node {
+        left: Node|()
+        right: Node|()
+    }
+    record Tree {
+        root: Node|()
+    }
+    */
+
+    letrec (Tree, Node) = (
+        Node | (),
+        record {
+            left: Tree = ()
+            right: Tree = ()
+        }
+    )
+
+    let max = (a: Float, b: Float) => if(a > b, a, b)
+
+    fun depth(tree: Tree): Int {
+      match tree {
+        case u: () -> 0
+        case tree: Node -> 1 + max(depth(tree.left), depth(tree.right))
+      }
+    }
+
+    fun assertDepth(d: Int, root: Tree) = assert depth(root) == d
+
+    assertDepth(0, ())
+    assertDepth(1, Node())
+    assertDepth(2, Node(left = Node()))
+    assertDepth(3, Node(left = Node(right = Node())))
+}

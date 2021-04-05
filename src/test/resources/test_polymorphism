@@ -1,0 +1,21 @@
+// 多态函数
+{
+    let id = a => a
+    assert id(42) == 42
+    assert id(3.14) == 3.14
+    assert id("Hi") == "Hi"
+}
+
+{
+    let add = (a, b) =>
+        match (a, b) {
+            case (a:Float, b:Float) -> a + b
+            case (a: Str, b: Str) -> a ++ b
+        }
+    assert add(1, 2) == 3
+    assert add(100, 3.14) == 103.14
+    assert add("Hello", "World") == "HelloWorld"
+    // 没有匹配到为 Void
+    debugger IO.println(add(1, "Str"))
+
+}

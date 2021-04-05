@@ -1,0 +1,42 @@
+{
+    // 模块可以嵌套
+    module A {
+        module B {
+            module C {
+                let a = 1
+                let c = 2
+            }
+        }
+    }
+
+    // import * 之后也可以起别名
+    import *, c as b from A.B.C
+    assert a == 1
+    assert b == 2
+}
+
+import *, print as echo from IO
+echo("HELLO" ++ "\n")
+echo("WORLD" ++ "\n")
+
+
+
+{
+    let a: Int[] = [] // 在 assign 时候处理
+    // let a = [] as Int[] // todo 两种都支持
+    import append from Vectors
+    IO.println(a)
+    append(a, 2)
+    IO.println(a)
+
+    debugger let union_vec: (Int|Str)[] = [1]
+
+    let union_vec: (Int|Str)[] = []
+    append(union_vec, 1)
+    append(union_vec, "Hello")
+    // append(union_vec, 3.14)
+    IO.println(union_vec)
+
+
+
+}

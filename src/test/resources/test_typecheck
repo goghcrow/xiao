@@ -1,0 +1,544 @@
+import * from Vectors
+import * from IO
+
+assert Any | Int == Any
+assert Int | Str | Bool == (Int | Str) | (Str | Bool) | (Int | Bool)
+
+
+debugger let no_type_empty_arr = [] // 类型检查失败, 没有类型标记没法推导
+
+
+// 根据参数决定返回值类型
+// 感觉根据参数值决定参数类型好像也能做
+// 不管是参数和返回值类型，只支持根据常量推导，如果那个 RType 里头的 i 只有运行时才知道是啥，类型检查阶段是推导不出来的，只能在 runtime 时候 再执行检查，这个没弄
+{
+    let RType = (i: Int) => if i == 42 { Int } else { Str }
+
+    let f = (i: Int): RType(i) => if i == 42 { i } else { "HelloWorld" }
+
+    assert f(42) == 42
+    assert f(1) == "HelloWorld"
+
+    debugger let x:Int = f(1)   // 类型检查失败
+    debugger let y:Str = f(42)  // 类型检查失败
+
+    let f1 = (a: Int): RType(a) => 1
+    debugger f1("str") // 类型检查失败
+}
+
+
+
+/*
+{
+    let a = [1]
+    let v1: (Int|Str)[] = a
+    append(v1, "str") // boom
+}
+
+{
+    let f = (r: record {a:Int}) => r.a
+    f([a:1, b:"str"])
+}
+
+{
+    let v1:  (Int|Str)[]   = [1]
+    let v2:  (Int|Str)[]   = ["str"]
+    let v3: (Int|Str)[][] = [[1]]
+    let v4: (Int|Str)[][] = [["str"]]
+    let v5: (Int|Str)[][] = [[1],["str"]]
+
+    let f1 = (a: (Int|Str)[] = [1]) => a
+    f1()
+    f1(["str"])
+
+    let f2 = (a: (Int|Str)[][] = [[1]]) => a
+    f()
+    f2([["str"]])
+    f2([[1],["str"]])
+
+    record A1 {
+        v1:  (Int|Str)[] = [1]
+    }
+    let a11 = A1()
+    let a12 = A1(["str"])
+
+    record A2 {
+        v1:  (Int|Str)[][] = [[1]]
+    }
+    let a21 = A2()
+    let a22 = A2([["str"]])
+    let a23 = A2([[1],["str"]])
+}
+
+
+{
+    let a = [1]
+    let v1:  (Int|Str)[]   = a
+
+    let b = ["str"]
+    let v2:  (Int|Str)[]   = b
+
+    let v3: (Int|Str)[][] = [a]
+    append(v3[0], "str")
+
+    let c = [[1]]
+    let v3: (Int|Str)[][] = c
+    append(v1, [1, "str"])
+    append(v1, ["str"])
+
+
+
+    let v4: (Int|Str)[][] = [["str"]]
+    let v5: (Int|Str)[][] = [[1],["str"]]
+
+    let f1 = (a: (Int|Str)[] = [1]) => a
+    f1()
+    f1(["str"])
+
+    let f2 = (a: (Int|Str)[][] = [[1]]) => a
+    f()
+    f2([["str"]])
+    f2([[1],["str"]])
+
+    record A1 {
+        v1:  (Int|Str)[] = [1]
+    }
+    let a11 = A1()
+    let a12 = A1(["str"])
+
+    record A2 {
+        v1:  (Int|Str)[][] = [[1]]
+    }
+    let a21 = A2()
+    let a22 = A2([["str"]])
+    let a23 = A2([[1],["str"]])
+}
+*/
+
+/**********************《测试 类型推导选择声明类型还是实际类型》***********************/
+
+// mutable 采用声明参数
+{
+    let f = (mut a: Int|Str) => {
+        a = "str"
+        a = 1
+        debugger a + 1 // 这里 union + int 检查失败
+    }
+    f(1)
+}
+
+// 因为 a 是 immutable 所以这里用实际参数
+{
+    // 注意这里要标记返回值类型, 否则推导返回值类型时候 会报错
+    let f = (a: Int|Str): Int => {
+            debugger a = "str" // 不能改
+            debugger a = 1 // 不能改
+            a + 1 // 这里 a 是实际类型 int
+    }
+    assert f(1) == 2
+}
+{
+    // 注意这里要标记返回值类型, 否则推导返回值类型时候 会报错
+    (a: Int|Str) => {
+        debugger a + 1
+    }
+}
+
+
+// mut 采用声明类型
+{
+    let mut a: Int|Str = 1
+    a = "str"
+    a = 1
+    debugger a + 1
+}
+
+// mut 采用声明类型
+{
+    let A = record {
+        mut a: Int|Str
+    }
+    let a = A(1)
+    a.a = "str"
+    a.a = 1
+    debugger a.a + 1
+}
+
+
+/**********************《测试 define&assign》***********************/
+
+{
+    let mut a1: (Int|Str)[] = []
+    append(a1, "str")
+    append(a1, 1)
+
+    debugger let mut a2: (Int|Str)[] = [1]
+    debugger let mut a3: (Int|Str)[] = ["str"]
+    debugger a1 = [1]
+
+    let mut a2: (Int|Str)[] = [1] as (Int|Str)[]
+    let mut a3: (Int|Str)[] = ["str"] as (Int|Str)[]
+    a1 = [1] as (Int|Str)[]
+
+    let NumVec = (Int|Str)[]
+    let a4: NumVec = [1] as NumVec
+}
+
+/**********************《测试 函数参数》***********************/
+
+// 加入 guard 严格写法
+let f = (a: Int|Str) => {
+    match a {
+        case a: Int -> a + 1
+        case a: Str -> a ++ " World!"
+    }
+}
+
+// 非严格写法, 无实际调用, 类型检查失败
+// (a: Int|Str) => a + 1 // invokeUncalled 阶段触发类型检查失败
+
+/* 支持起来有点麻烦 算了
+// 非严格写法, 当有实际调用, 采取根据实际类型检查策略
+{
+    let f = (a: Int|Str) => a + 1
+
+    f(1) // 类型检查通过
+    f(a = 1) // 类型检查通过
+
+    debugger f("Hello") // 类型检查错误
+    debugger f(a = "Hello") // 类型检查错误
+}
+*/
+
+
+{
+    let unit = ()
+
+    let f = (a: Int|Str) => 42
+
+    // 因为最终没有用到参数 a, 所以 a 传入 int 还是 str 没关系, 但是必须是 Int|Str
+    assert f("Hello") == 42
+    assert f(111) == 42
+    debugger f(unit) // 传输 unit 会导致类型检查失败
+}
+
+
+{
+    let f = (a: Int|Str) => {
+        infixn +
+        let + = (a: Int|Str, b:Int) => a
+        a + 1
+    }
+    match f("str") {
+        case v: Str -> assert v == "str"
+    }
+
+    assert f(1) == 1
+}
+
+{
+    let f = (a: (Int|Str)[]) => append(a, "Hello")
+    f([])
+    debugger f([1])
+    let args: (Int|Str)[] = []
+    append(args, 1)
+    f(args)
+
+    // todo !!! 字面量可以穿, 但是引用不行...
+}
+
+
+
+/**********************《测试 函数返回值》***********************/
+
+{
+
+    let f = (): (Int|Str)[] => []
+    append(f(), 1)
+    append(f(), "str")
+
+    // let f = (): (Int|Str)[] => if true { [1] } else { ["str"] }
+}
+
+/**********************《测试 record 域》***********************/
+
+{
+    let A = record {
+        a: (Int|Str)[] = []
+    }
+    let a1 = A()
+    append(a1.a, 1)
+    append(a1.a, "str")
+
+    debugger A([1])
+    debugger A(["str"])
+
+    let a2 = A([])
+    append(a2.a, 1)
+    append(a2.a, "str")
+}
+
+/**********************《测试 空数组》***********************/
+
+{
+    // 测试类型检查对空数组的处理
+    /* let mut v = [] // Vector<Unknown>
+    v = [1]
+    v[0] = 1 */
+
+    let mut v1: Int[] = []
+    v1 = []
+    ((v: Int[]): Int[] => [])([])
+}
+
+/**********************《测试 union attribute》***********************/
+
+{
+    let obj = if true {
+        [
+            x: 1
+        ]
+    } else {
+        [
+            x: 1
+            y: 2
+        ]
+    }
+    assert obj.x == 1
+    debugger obj.y // 类型检查可以识别
+}
+
+/**********************《测试 union subscript》***********************/
+
+{
+    let vec = if true {
+        (1, "str", true)
+    } else {
+        (1.1, 2.2, 3.3)
+    }
+    let a: Int = vec[0]
+
+    let b: Int|Float = vec[0]
+    let c: Float|Str = vec[1]
+    let d: Float|Bool = vec[2]
+}
+
+/**********************《测试 union call》***********************/
+
+{
+    let callee = if true {
+        (x : Int, y : Int) => x + y
+    } else {
+        record { x : Int, y : Int }
+    }
+    callee(x = 1, y = 2)
+}
+
+{
+    let callee = (cond: Bool) => if cond {
+        (x : Int, y : Int) => x + y
+    } else {
+        record { x : Int, y : Int, z : Int }
+    }
+    callee(true)(x = 1, y = 2)
+    callee(false)(x = 1, y = 2, z = 3)
+    debugger callee(false)(x = 1, y = 2)
+    debugger callee(true)(x = 1, y = 2, z = 3)
+}
+
+
+/**********************《测试 简单的泛型》***********************/
+
+{
+    // L R 默认 Any
+    let PairOf = (L, R) => record { left: L, right: R }
+    let IntStr = PairOf(Int, Str)
+
+    // L R 默认 Any
+    let MutPairOf = (L, R) => record { mut left: L, mut right: R }
+    let MutIntStr = MutPairOf(Int, Str)
+
+    {
+        // 这里语法不统一, rec 字面量是中括号, 需要处理下
+        let [left: left, right: right] = IntStr(42, "Hi")
+        assert left == 42 && right == "Hi"
+        let [left: l, right: r] = IntStr(42, "Hi")
+        assert l == 42 && r == "Hi"
+    }
+
+    debugger IntStr(3.14, "Hi") // 类型检查失败
+    debugger IntStr(1, 1) // 类型检查失败
+    debugger IntStr(42, "Hi").left = 1 // 类型检查失败
+    debugger IntStr(42, "Hi").right = "Hello" // 类型检查失败
+
+    let mutPair = MutIntStr(1, "Hi")
+    mutPair.left = 42
+    assert mutPair.left == 42
+    mutPair.right = "Hello"
+    assert mutPair.right == "Hello"
+
+    debugger MutIntStr(3.14, "Hi") // 类型检查失败
+    debugger MutIntStr(1, 1) // 类型检查失败
+    debugger mutPair.left = 3.14 // 类型检查失败
+    debugger mutPair.left = "Hello" // 类型检查失败
+    debugger mutPair.right = 3.14 // 类型检查失败
+    debugger mutPair.right = 1 // 类型检查失败
+}
+
+{
+    // 这里 T 会推导为实际类型
+    let IdOf = T => (a: T) => T
+    let f = (id: IdOf(Int)) => (a: Int) => id(a)
+    let a = (a: Int) => a
+    assert f(a)(42) == 42
+
+    debugger f((a: Str) => a)
+    debugger f((a: Int) => a)(3.14)
+}
+
+// 注意
+{
+    // 当泛型用的时候, 这里必须不是 mut
+    // 因为如果是 mut 的话, T 会推导为声明类型而不是实际类型
+    let IdOf = (mut T) => (a: T) => T
+    let f = (id: IdOf(Int)) => (a: Int) => id(a)
+    let a = (a: Int) => a
+    // 类型错误，期望 (Any,) → Any, 实际 (Int,) → Int
+    debugger f(a)
+}
+
+{
+    let RecordOf = T => record {
+        name: T
+    }
+    let f = (a: RecordOf(Int)) => a
+    assert f([name: 1]).name == 1
+    debugger f([name: 1.1])
+}
+
+{
+    infixl <<
+    let << = (vec: Any[], v) => append(vec, v)
+
+    let VecOf = T => T[]
+    let vi: VecOf(Int) = []
+    vi << 1
+    debugger vi << 1.1
+
+    let vvi: VecOf(VecOf(Int)) = [] // 等同于 let vvi: Int[][] = []
+    vvi << [1]
+    vvi << ([] as Int[])
+    debugger vvi << [1.1]
+}
+
+
+/**********************《测试 record 属性赋值, 嵌套数组赋值等》***********************/
+
+
+{
+    let a: (Int|Str)[] = [1, "hello"]
+    [a[0], a[1]] = ["world", 2]
+    assert a[0] == "world" && a[1] == 2
+}
+
+{
+    record A {
+        mut a: Int[] = []
+    }
+
+    let a1 = A()
+    append(a1.a, 1)
+
+    a1.a = [1]
+    append(a1.a, 2)
+    assert a1.a[0] == 1
+    assert a1.a[1] == 2
+
+    let a2 = A([1])
+    a2.a = [1]
+    append(a2.a, 2)
+    assert a2.a[0] == 1
+    assert a2.a[1] == 2
+}
+
+{
+    record A {
+        mut a: (Int|Str)[] = []
+    }
+
+    let a1 = A()
+    debugger a1.a = [1]
+    append(a1.a, 1)
+    append(a1.a, "str")
+    assert a1.a[0] == 1
+    assert a1.a[1] == "str"
+}
+
+{
+    let a: (Int|Str)[][] = []
+    debugger append(a, [1])
+    append(a, [])
+    append(a[0], "str")
+    println(a)
+    println(a[0])
+    println(a[0][0])
+    assert a[0][0] == "str"
+
+    debugger [a[0]] = [["str"]]
+    [a[0]] = [[1, "str"]]
+    debugger (a[0],) = (["str"],)
+    (a[0],) = ([1, "str"],)
+}
+
+
+/**********************《测试 match type》***********************/
+{
+    record Foo {
+        id : Int
+    }
+
+    let Num = Int | Float
+    let add = (a: Num, b: Num) => a + b
+
+    let match_type = v => match v {
+            case _: Bool -> Bool
+            case _: Int -> Int
+            case _: Float -> Float
+            case _: Str -> Str
+            case _: (Int,) -> (Int,)
+            case _: (Int|Float,) -> (Int|Float,)
+            case _: (Any,) -> (Any,)
+            case _: Foo -> Foo
+            case _: add -> add
+            case _: `+` -> `+`
+            case Any -> Any // case _ -> 0
+        }
+
+    let test_match_type = (v, T) => {
+        println("--------------")
+        println(v)
+        // println(typeof(v))
+        println(T)
+        println("============")
+        match match_type(v) {
+            case v: T -> assert v == T
+            case _: Any ->  assert false
+        }
+    }
+
+
+    test_match_type(true, Bool)
+    test_match_type(false, Bool)
+    test_match_type(1, Int)
+    test_match_type(3.14, Float)
+    test_match_type("Hello", Str)
+
+    test_match_type((1,), (Int,))
+    test_match_type((3.14,), (Int|Float,))
+    test_match_type(("Hello",), (Any,))
+
+    test_match_type(Foo, Foo)
+    // test_match_type(`+`, `+`) // todo
+
+    test_match_type(add, add)
+}

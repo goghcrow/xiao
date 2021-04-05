@@ -1,0 +1,139 @@
+{
+    let arr: Any[] = []
+    Vectors.append(arr, arr)
+    IO.println(arr)
+}
+
+// 递归声明类型
+{
+    // letrec (A, B) = (B, A)
+    typerec (A, B) = (
+        (42, B),
+        (3.14, A)
+    )
+}
+
+{
+    // 1. 递归函数必须写返回值
+    // 2. 相互递归函数如果不用 letrec 声明, 没法推导类型
+    let is_even = (n: Int): Bool => n == 0 || is_odd(n - 1)
+    let is_odd = (n: Int): Bool => n != 0 && is_even(n - 1)
+    assert is_even(0) && is_odd(1) && is_even(2) && is_odd(3) && is_even(4) && is_odd(5)
+}
+
+{
+    // Mutually Recursive
+    letrec (A, B) = (
+        record {
+            b: B
+        },
+        record {
+            a: A
+        }
+    )
+    letrec (a, b) = (
+        A(b),
+        B(a)
+    )
+    assert a.b == b
+    assert b.a == a
+
+    // tuple
+    {
+        letrec (X, Y) = ( (X, Y), (Y, X) )
+        assert X[0] == X && X[1] == Y && Y[0] == Y && Y[1] == X
+    }
+
+    // vec
+    {
+        letrec (X, Y) = ( [X, Y], [Y, X] )
+        assert X[0] == X && X[1] == Y && Y[0] == Y && Y[1] == X
+    }
+
+
+    // todo
+    // letrec 其他类型测试，参考LetRecFixer
+}
+
+{
+    record A {
+        a: Int
+        b = 1
+    }
+    let f = (i: Int) :A => {
+        if i > 0 {
+            f(i - 1)
+        } else {
+            A(i, i)
+        }
+    }
+    let [a: a, b: b] = f(10)
+    assert a == 0 && b == 0
+}
+
+{
+    // 递归函数依赖与标注类型, 不会进行推导
+    let f = () :(Int,) => f()
+    // let (a,) = f() // stackoverflow
+}
+
+{
+    record Node {
+        val :Int
+        mut next :Node|() = ()
+        mut pre :Node|() = ()
+    }
+    let n1 = Node(val = 1)
+    let n2 = Node(val = 1, next = Node(2))
+    let n3 = Node(val = 1, pre = Node(2), next = Node(3))
+}
+
+{
+    record A {
+        a: Int
+        b: Int
+        c = 1
+    }
+    let f = () :A => f()
+    // let {a, b, c} = f() // stackoverflow
+}
+
+// todo union type 解构的问题!!!
+{
+    record Node {
+        val: Int
+        mut next: Node|() = ()
+        mut pre: Node|() = ()
+    }
+
+    let a = Node(val = 1)
+    let b = Node(val = 2)
+    let c = Node(val = 3)
+
+    // linked
+    (a.pre, a.next, b.pre, b.next, c.pre, c.next) = ((), b, a, c, b, ())
+
+    /*
+    let {
+        val
+        // todo 改匹配字面量语法
+        next = { val = val_nxt }
+        pre  = { val = val_pre }
+    } = b
+    assert val == 2 && val_nxt == 3 && val_pre == 1
+    */
+
+    assert b.val == 2 && (b.next as Node).val == 3 && (b.pre as Node).val == 1
+
+    // let {pre, next = {next = { next }}} = a
+    // assert pre == () && next == ()
+
+    assert (a.pre as ()) == () && (((a.next as Node).next as Node).next as ()) == ()
+}
+
+
+
+// todo 应该推导出来 Never
+// (() => while true {  }) ()
+// todo 应该推导出来 Int
+// (() => while true { return 42 }) ()

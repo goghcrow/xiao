@@ -1,0 +1,148 @@
+
+/**********************《测试 声明 var tuple vector record》***********************/
+
+// 变量默认 immutable, 需要显示加 mut
+let immutable_var = 1
+let mut mutable_var = 1
+
+
+{
+    let t1 = ("hello", 1)
+    let t2 = ("hello", 3.14)
+
+    let TupleOfStrFloat = (Str, Float)
+    let mut t : (Str, Float) = t1
+    t = t2
+    debugger t = (1,1) // 类型检查失败
+}
+
+{
+    let vec = [0]
+    vec[0] = 42
+    assert vec[0] == 42
+}
+
+// 属性默认immutable, 需要显示加 mut, 与变量绑定统一
+record {
+    a: Int, b: Int, c: Int
+}
+
+record {
+    a: Int
+    b: Int
+    c: Int
+}
+
+record {
+    mut a: Int // 可修改
+    b = 1 // 无类型默认值, 默认为默认值类型
+    c: Str // 有类型 无默认值
+    mut d: Float = 3.14 // 可修改, 显示声明类型, 有默认值
+}
+
+
+let empty_record_literal = [:]
+
+// record 字面量, 为了避免与 block 语法歧义, 使用中括号
+let immutable_rec = [ id: immutable_var, name: "xiao" ]
+assert immutable_rec.id == immutable_var && immutable_rec.name == "xiao"
+// 字面量属性默认不可以修改
+debugger immutable_rec.id = 42
+assert immutable_rec.id == immutable_var
+
+// 字面量可声明 mut
+let mutable_rec = [ mut id: immutable_var, name: "xiao" ]
+mutable_rec.id = 42
+assert mutable_rec.id == 42
+
+
+
+
+// 可以用换行分隔属性
+let Color = record {
+    mut r :Int = 0
+    mut g :Int = 0
+    mut b :Int = 0
+}
+
+// 可以可以用逗号分隔, 混合也可以
+let Point = record {
+    mut x: Int, mut y: Int
+}
+
+
+// extends 纯粹是简化重复代码, 没有其他任何意义
+
+{
+    let Id = record {
+        id :Int
+    }
+
+    // record 可以继承属性, 继承多个, 属性按声明顺序覆盖
+    let Identified_PNG = record {
+        mut alpha :Int
+    } extends Color, Id
+
+    infixl 4 `and`
+    let and = `&&`
+
+    // 有默认值可以不用传
+    let png = Identified_PNG(alpha = 255, id=42)
+    assert png.r == 0 `and` png.g == 0 `and` png.b == 0 `and` png.alpha == 255 `and` png.id == 42
+}
+
+// 取消对属性冲突覆盖的支持, 规则会引起歧义, 直接报错
+// extends 覆盖
+/*
+{
+    let A = record {
+        a = 1
+    }
+    let B = record {
+        a = 2
+    }
+    assert (record { } extends B, A)().a == 1
+    assert (record { } extends A, B)().a == 2
+    assert (record { a = 3 } extends A, B)().a == 3
+}
+*/
+
+
+// 考了一下不想支持了
+/*
+{
+    let Counter = record {
+        mut cnt = 0
+        // record 的闭包属性可以通过 self 访问到 record 自身
+        add = () => {
+            self.cnt = self.cnt + 1
+            self.cnt
+        }
+        shadow = self => self
+    }
+    let cnt = Counter()
+    assert cnt.add() == 1 && cnt.add() == 2
+    assert cnt.shadow(42) == 42
+}
+
+// type check invoke uncalled fun
+{
+    let Counter = record {
+        mut cnt = 0
+        // record 的闭包属性可以通过 self 访问到 record 自身
+        add = () => {
+            self.cnt = self.cnt + 1
+            self.cnt
+        }
+        shadow = self => self
+    }
+    let cnt = Counter()
+}
+*/
+
+
+// record 类型可以直接声明, 可以优化下语法
+{
+    let f = (r: record {a: Int}) => r.a
+    f([a:1, b:"str"])
+}

@@ -1,0 +1,27 @@
+/*
+内置操作符
+prefix 10 -
+infixl 12 (
+infixl 13 [
+infixl 13 .
+infixl 13 =>
+max 20
+*/
+
+// 操作符声明只对当前作用域有效
+infixl 3 ||
+infixl 4 &&
+infixn 5 ==
+infixn 5 !=
+infixn 6 as // hack
+infixn 7 <
+infixn 7 >
+infixn 7 <=
+infixn 7 >=
+infixl 8 ++ // 字符串拼接
+infixl 8 +
+infixl 8 -
+infixl 9 *
+infixl 9 /
+prefix 10 !
+infixl 12 |
