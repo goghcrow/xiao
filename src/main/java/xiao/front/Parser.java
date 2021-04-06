@@ -6,11 +6,12 @@ import xiao.Scope;
 import xiao.misc.Error;
 import xiao.misc.Helper;
 import xiao.misc.Location;
+import xiao.misc.Pair;
 
 import java.util.*;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.*;
+import static xiao.front.Ast.*;
 import static xiao.front.TokenType.*;
 import static xiao.misc.Helper.join;
 import static xiao.misc.Helper.lists;
@@ -53,7 +54,7 @@ public class Parser {
         }
 
         boolean isMinus(Token tok) {
-            return tok.lexeme.equals("-");
+            return "-".equals(tok.lexeme);
         }
 
         @Override
@@ -260,7 +261,7 @@ public class Parser {
         if (lexer.tryEat(NEWLINE) == null) {
             return false;
         }
-        //noinspection StatementWithEmptyBody
+        //noinspection StatementWithEmptyBody,AliControlFlowStatementWithoutBraces
         while (lexer.tryEat(NEWLINE) != null);
         return true;
     }
@@ -596,7 +597,7 @@ public class Parser {
         public Import import1(@NotNull Token import1) {
             tryEatLines();
 
-            Map<Id, Id> aliasMap = new HashMap<>();
+            List<Pair<Id, Id>> aliasMap = new ArrayList<>();
             boolean hasStar = false;
             do {
                 tryEatLines();
@@ -607,7 +608,7 @@ public class Parser {
                     }
                     hasStar = true;
                     Id star = id(tok.loc, tok.lexeme);
-                    aliasMap.put(star, star);
+                    aliasMap.add(new Pair<>(star, star));
                 } else if (tok.is(NAME)) {
                     Id name = id(tok.loc, tok.lexeme);
                     Id alias = name;
@@ -618,7 +619,7 @@ public class Parser {
                         tok = lexer.eat(NAME);
                         alias = id(tok.loc, tok.lexeme);
                     }
-                    aliasMap.put(name, alias);
+                    aliasMap.add(new Pair<>(name, alias));
                 } else {
                     throw Error.syntax(tok.loc, "期望 import * 或者 import name as alias 实际是 " + tok.lexeme);
                 }

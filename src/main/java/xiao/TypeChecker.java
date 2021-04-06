@@ -4,20 +4,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiao.front.Ast;
 import xiao.match.Matchers;
+import xiao.misc.*;
 import xiao.misc.Error;
-import xiao.misc.Helper;
-import xiao.misc.Location;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import static xiao.front.Ast.Str;
-import static xiao.front.Ast.*;
 import static xiao.Constant.*;
 import static xiao.Copy.copyType;
 import static xiao.Type.*;
 import static xiao.Value.*;
-import static xiao.misc.Helper.lists;
+import static xiao.front.Ast.Str;
+import static xiao.front.Ast.*;
+import static xiao.misc.Diagnosis.*;
 
 /**
  * @author chuxiaofeng
@@ -25,6 +24,8 @@ import static xiao.misc.Helper.lists;
 public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Value> {
 
     TypeChecker() { }
+
+    public final List<Diagnosis> typeErrors = new LinkedList<>();
 
     @Override
     public Value eval(@NotNull Node n, @NotNull Scope s) {
@@ -37,6 +38,24 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
     Value typecheck(@NotNull Node node, @NotNull Scope s) {
         Stack.resetTypeStack();
         return visit(node, s);
+    }
+
+    void addError(Error.Type error) {
+        addError(Category.WARNING, error);
+    }
+
+    // todo 其他错误
+    void addError(Category cat, Error.Type error) {
+        typeErrors.add(new Diagnosis(error.loc, cat, error.toString()));
+    }
+
+    void summary() {
+        if (typeErrors.isEmpty()) {
+            return;
+        }
+        for (Diagnosis d : typeErrors) {
+            Helper.log(d.toString());
+        }
     }
 
     void invokeUncalled(FunType fun, Scope s, boolean checkRet) {
@@ -138,7 +157,7 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
     @Override
     public Value visit(@NotNull VectorLiteral tuple, @NotNull Scope s) {
         if (tuple.elements.isEmpty()) {
-            return VectorType(UNKNOWN, new ArrayList<>());
+             return VectorType(UNKNOWN, new ArrayList<>());
         } else {
             List<Value> types = typecheckList(tuple.elements, s);
             return VectorType(union(types), types);
@@ -562,12 +581,18 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
             s.put(name, KEY_MUT, FALSE);
         }
 
-        // todo !!! 尝试移除这个
-        // 先调用一次, 获取参数与返回值类型
-        invokeUncalled(funType, s, false);
+        // 声明时候先不处理, 如果该函数最终没有被调用到, 或者被传递或者复制
+        // 结尾 uncalled 会统一处理
+        funType.fillParamRetType = () -> fillParamAndRetType(funType, s);
 
         uncalled.add(funType);
         return funType;
+    }
+
+    void fillParamAndRetType(FunType ft, Scope s) {
+        // 先调用一次, 获取参数与返回值类型
+        // TODO: 这里是万恶之源 !!!, 尝试移除
+        invokeUncalled(ft, s, false);
     }
 
     @Override
@@ -713,6 +738,7 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
                 Voids.not(arg.loc, actual, "实参 " + name + " 不能为 Void");
                 Voids.not(arg.loc, expected, "形参 " + name + " 不能为 Void");
                 Object mut = funScope.lookupLocalProp(name, KEY_MUT);
+                // 这里逻辑是 mut 用声明类型, 非 mut 用实际类型
                 funScope.putValue(name, select(loc, mut == TRUE, expected, actual));
             }
         }
@@ -1147,9 +1173,9 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
         Location starLoc = null;
         Set<String> imported = new HashSet<>();
 
-        for (Entry<Id, Id> it : import1.aliasMap.entrySet()) {
-            Id key = it.getKey();
-            Id val = it.getValue();
+        for (Pair<Id, Id> it : import1.aliasMap) {
+            Id key = it.fst;
+            Id val = it.snd;
             if (key.name.equals(IMPORT_STAR)) {
                 starLoc = key.loc;
             } else {
@@ -1182,7 +1208,7 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
             throw Error.type(loc, "module 中 属性不存在 " + name);
         }
 
-        Value existing = s.lookupLocal(name);
+        Value existing = s.lookupLocal(alias);
         if (existing != null) {
             throw Error.type(loc, "import 名称冲突 " + name);
         }
@@ -1358,10 +1384,6 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    static boolean isEmptyVectorLiteral(Value value) {
-        return value instanceof VectorType && ((VectorType) value).isEmptyLiteral();
-    }
 
     public static void emptyVectorAssert(Location loc, Value value) {
         if (isEmptyVectorLiteral(value)) {

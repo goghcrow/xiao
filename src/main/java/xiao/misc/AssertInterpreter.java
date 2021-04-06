@@ -6,9 +6,9 @@ import xiao.Scope;
 import xiao.TypeChecker;
 import xiao.Value;
 
+import static xiao.Value.*;
 import static xiao.front.Ast.Str;
 import static xiao.front.Ast.*;
-import static xiao.Value.*;
 import static xiao.misc.AssertRender.render;
 import static xiao.misc.Helper.log;
 

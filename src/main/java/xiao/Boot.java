@@ -8,13 +8,11 @@ import xiao.misc.Helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import static xiao.front.Ast.Block;
-import static xiao.front.Ast.internalModule;
 import static xiao.Constant.*;
 import static xiao.Type.*;
+import static xiao.Value.Float;
 import static xiao.Value.*;
-import static xiao.misc.Helper.path;
-import static xiao.misc.Helper.read;
+import static xiao.front.Ast.Block;
 
 /**
  * @author chuxiaofeng
@@ -60,11 +58,15 @@ public class Boot {
             // 过程中可能会加入新的 uncall, 所以要这么处理
             List<FunType> toRemove = new ArrayList<>(checker.uncalled);
             for (FunType ft : toRemove) {
-                checker.invokeUncalled(ft, s, true);
+                try {
+                    checker.invokeUncalled(ft, s, true);
+                } catch (Error.Type e) {
+                    checker.addError(e);
+                }
             }
             checker.uncalled.removeAll(toRemove);
         }
-
+        checker.summary();
         return t;
     }
 

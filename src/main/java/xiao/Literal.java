@@ -130,7 +130,7 @@ public class Literal {
             }
         } else if (v instanceof VectorType) {
             st.push(v);
-            // todo 这里同时清除了 positional
+            // todo 这里同时清除了 positional // ???
             VectorType vt = VectorType(clear(((VectorType) v).eltType, st));
             st.pop(v);
             return vt;

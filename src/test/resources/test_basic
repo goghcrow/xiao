@@ -6,7 +6,7 @@
     debugger user.location
 
     // 声明哪怕没调用 也会进行类型检查
-    debugger fun flipCoin_typo() = Math.random < 0.5
+    /*debugger*/ fun flipCoin_typo() = Math.random < 0.5
 
     fun flipCoin() = Math.random() < 0.5
     flipCoin()

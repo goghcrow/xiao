@@ -36,6 +36,7 @@ interface Matcher<C, R> {
         throw Error.type(ptn.loc, "不支持的 pattern: " + ptn);
     }
 
+    @SuppressWarnings("AliControlFlowStatementWithoutBraces")
     default R match(@NotNull Node ptn, @NotNull C ctx) {
         // true false, 本质是 id 从 scope 找 bool val
         if (ptn instanceof Id)                  return match((Id) ptn, ctx);

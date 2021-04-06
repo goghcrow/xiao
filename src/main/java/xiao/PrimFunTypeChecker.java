@@ -5,12 +5,14 @@ import xiao.misc.Error;
 import xiao.misc.Location;
 
 import java.util.Objects;
+import java.util.Vector;
 
 import static java.util.Objects.requireNonNull;
-import static xiao.Literal.*;
-import static xiao.Stack.*;
+import static xiao.Literal.literal;
+import static xiao.Stack.MonoStack;
+import static xiao.Stack.valueStack;
 import static xiao.Type.*;
-import static xiao.Value.*;
+import static xiao.Value.PrimArgs;
 
 /**
  * @author chuxiaofeng

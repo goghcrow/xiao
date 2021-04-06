@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static xiao.Stack.*;
+import static xiao.Stack.MonoStack;
+import static xiao.Stack.valueStack;
 import static xiao.Type.*;
 import static xiao.Value.*;
 

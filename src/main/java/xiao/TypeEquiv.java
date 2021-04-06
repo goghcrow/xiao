@@ -206,10 +206,15 @@ class TypeEquiv {
     boolean subtype(VectorType t1, VectorType t2, PairStack ts, boolean equivable) {
         // 空数组既是子类又是超类
 
-        // 处理 let v: Int[] = [], 空数组是所有数组的子类型
+        // 空数组是所有数组的子类型
+        // 1. 处理 let v: Int[] = [],
         // [] as Int[]
-        if (t1.isEmptyLiteral()) {
-            assert t2.eltType != UNKNOWN;
+        // 2. T[] union UNKNOWN[] = T[]
+        // [] | [42] = [42]
+        // let a: Int[] = if Math.random() > 3.14 { [] } else { [1, 2, 3] }
+        if (isEmptyVectorLiteral(t1)) {
+            // [[], []]    UNKNOWN[] | UNKNOWN[]
+            // assert t2.eltType != UNKNOWN;
             return true;
         }
 
@@ -262,17 +267,33 @@ class TypeEquiv {
                 return false;
             }
 
+            Object f1mut = t1.props.lookupLocalProp(key, KEY_MUT);
             Object f2mut = t2.props.lookupLocalProp(key, KEY_MUT);
+
+            assert f1mut == null || f1mut == TRUE || f1mut == FALSE;
             assert f2mut == null || f2mut == TRUE || f2mut == FALSE;
-            boolean mut = f2mut != FALSE;
+
+            // mutable <: immutable
+            // mutable <: mutable
+            // immutable <: immutable
+            // immutable <: mutable 不成立
+            if ((f1mut == FALSE || f1mut == null) && f2mut != FALSE) {
+                // let (A, B) = (record { mut name: Int }, record { name: Int })
+                // let mut (a, b) = (A(42), B(42))
+                // b = a // mut 可以复制给 immutable
+                // debugger a = b // immutable 不可以赋值给 mutable
+                // a.name = 100 实际把 b.name 改了...
+                return false;
+            }
 
             // 当域 mutable 与数组一样对待, 强制要求不变
-            // e.g. 如果 (struct {mut x: int}) <: (struct {mut x: float}) 成立
-            // let a : (struct {mut int}) = ({1})
-            // let b : (struct {mut float}) = a
+            // e.g. 如果 (record {mut x: int}) <: (record {mut x: float}) 成立
+            // let a : (record {mut int}) = ({1})
+            // let b : (record {mut float}) = a
             // b[0].x = 3.14
             // a[0].x 类型错误, mut 域不构成 subtype 关系
             // depth subtyping 深度子类型, 只能用于 immutable 域
+            boolean mut = f2mut != FALSE;
             TypeEquiv equiv = (mut || isInvariant()) ? invariant() : this;
             if (!equiv.subtype(f1t, f2t, ts, equivable)) {
                 ts.pop(t1, t2);
@@ -326,12 +347,20 @@ class TypeEquiv {
         if (t1.paramsType == null || t1.retType == null) {
             // assert in interpreter
             // throw Error.bug("t1.paramType == null || t1.retType == null");
-            return t1.def == t2.def;
+            if (t1.fillParamRetType == null) {
+                return t1.def == t2.def;
+            } else {
+                t1.fillParamRetType.run();
+            }
         }
         if (t2.paramsType == null || t2.retType == null) {
             // assert in interpreter
             // throw Error.bug("t2.paramType == null || t2.retType == null");
-            return t1.def == t2.def;
+            if (t2.fillParamRetType == null) {
+                return t1.def == t2.def;
+            } else {
+                t2.fillParamRetType.run();
+            }
         }
 
         // 同一个 fun, fast routine

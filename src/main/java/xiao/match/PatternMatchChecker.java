@@ -5,10 +5,10 @@ import xiao.Evaluator;
 import xiao.Scope;
 import xiao.Value;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.ID_FALSE;
 import static xiao.Constant.ID_TRUE;
 import static xiao.Type.*;
+import static xiao.front.Ast.*;
 
 /**
  * 模式匹配
@@ -20,6 +20,7 @@ class PatternMatchChecker extends PatternMatcher {
         super(evaluator, env);
     }
 
+    @Override
     public Boolean match(@NotNull Define ptn, @NotNull Value value) {
         assert ptn.type != null;
         Value type = evaluator.eval(ptn.type, env);

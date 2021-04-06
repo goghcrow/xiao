@@ -80,6 +80,8 @@
 
 
 
-// todo bug
-// if Math.random() > 3.14 { [] } else { [1, 2, 3] }
-// [] | [42] // union unknown[] int[]  结果不对
+{
+    // T[] union UNKNOWN[] = T[]
+    // [] | [42] = [42]
+    let a: Int[] = if Math.random() > 3.14 { [] } else { [1, 2, 3] }
+}

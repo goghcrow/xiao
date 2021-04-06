@@ -16,9 +16,12 @@ public class Play {
 
     @Test
     public void tmp() {
-        String s = "(a, b) => 42\n" +
-                "(a, b): Int => 42";
-        Value eval = eval(s);
+        // String s = "if Math.random() > 3.14 { [] } else { [1, 2, 3] }";
+        // String s = "(  (f:(_:Int,_:Int)=>Int, a:Int, b:Int) => f(a, b)  )  ((a: Int, b: Int) => a + b, 1, 2) == 3";
+        // String s = "((f:(_:Int,_:Int)=>Int, a:Int, b:Int) => f(a, b))((a: Int, b: Int) => a + b, 1, 2) == 3";
+//        String s = "let a:Int[][][] = [[[]],[[]]] a";
+         String s = "let a:Int[][] = [[],[]] a";
+        Value eval = typecheck(s);
         System.out.println(eval);
 
     }

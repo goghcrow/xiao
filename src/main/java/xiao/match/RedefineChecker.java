@@ -10,8 +10,8 @@ import xiao.misc.Error;
 import java.util.HashSet;
 import java.util.Set;
 
-import static xiao.front.Ast.*;
 import static xiao.Value.VOID;
+import static xiao.front.Ast.*;
 
 /**
  * 检查是否重复绑定一个 name

@@ -57,6 +57,7 @@ public interface Visitor<C, R> {
     // R visit(@NotNull Throw throw1, @NotNull C ctx);
 
     // 不喜欢在一堆 node 上挖个洞实现 visit 方法, 倾向把数据和逻辑分开, 所以写 switch-case
+    @SuppressWarnings("AliControlFlowStatementWithoutBraces")
     default R visit(@NotNull Node n, @NotNull C ctx) {
 //        if (n instanceof Group)          return visit((Group) n,            ctx);
         if (n instanceof Id)             return visit((Id) n,               ctx);

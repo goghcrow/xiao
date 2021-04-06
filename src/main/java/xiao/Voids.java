@@ -4,7 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import xiao.misc.Error;
 import xiao.misc.Location;
 
-import static xiao.Stack.*;
+import static xiao.Stack.MonoStack;
+import static xiao.Stack.valueStack;
 import static xiao.Type.*;
 
 /**

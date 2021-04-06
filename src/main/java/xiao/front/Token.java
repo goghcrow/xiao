@@ -30,13 +30,14 @@ public class Token {
 
     @Override
     public String toString() {
-        if (lexeme.equalsIgnoreCase("\n")) {
+        if ("\n".equalsIgnoreCase(lexeme)) {
             return "\\n";
         } else {
             return lexeme;
         }
     }
 
+    @SuppressWarnings("AliControlFlowStatementWithoutBraces")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

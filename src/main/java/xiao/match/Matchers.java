@@ -5,9 +5,9 @@ import xiao.Evaluator;
 import xiao.Scope;
 import xiao.Value;
 
+import static xiao.Constant.WILDCARDS;
 import static xiao.front.Ast.Id;
 import static xiao.front.Ast.Node;
-import static xiao.Constant.WILDCARDS;
 
 /**
  * Match API

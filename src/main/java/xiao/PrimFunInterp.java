@@ -7,8 +7,6 @@ import xiao.misc.Location;
 import java.util.Objects;
 
 import static xiao.Type.*;
-import static xiao.Type.typeof;
-import static xiao.Type.union;
 import static xiao.Value.Float;
 import static xiao.Value.*;
 

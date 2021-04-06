@@ -145,6 +145,7 @@ final public class TokenType {
         return new TokenType(name, fixity, precedence);
     }
 
+    @SuppressWarnings("AliControlFlowStatementWithoutBraces")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

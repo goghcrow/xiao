@@ -13,13 +13,12 @@ import java.util.function.Supplier;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
-import static xiao.Literal.*;
-import static xiao.TypeEquiv.*;
-import static xiao.front.Ast.*;
 import static xiao.Constant.ID_RETURN;
+import static xiao.Literal.literal;
 import static xiao.ToString.stringfy;
+import static xiao.TypeEquiv.*;
 import static xiao.Value.*;
-import static xiao.misc.Helper.join;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng
@@ -95,6 +94,9 @@ public interface Type {
     static boolean isLitFalse(Value v)  { return FALSE.equals(literal(v));}
     static long    litInt(Value v)      { return requireNonNull(literal(v));     }
 
+    static boolean isEmptyVectorLiteral(Value value) {
+        return value instanceof VectorType && ((VectorType) value).isEmptyLiteral();
+    }
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     // literal  copy  typeof 等不想用 OO 的方式实现, 这样更简单一点, 改起来方便
@@ -394,7 +396,7 @@ public interface Type {
 
         // for declare, e.g. Int[]
         private VectorType(@NotNull Value eltType) {
-            assert eltType != UNKNOWN;
+            // assert eltType != UNKNOWN; // todo
             this.positional = null;
             this.size = UNKNOWN_SZ;
             this.eltType = eltType;
@@ -413,7 +415,23 @@ public interface Type {
             // Vectors.append(a, 3.14)
             // IO.println(b) // [3.14]
             // 所以 空数组字面量的类型不能是 Any[] 只能是 UNKNOWN[]
-            return positional != null && size == 0 && eltType == UNKNOWN;
+
+            // let a: Int[][] = [[]]
+            // let b: Float[][] = a
+            // b[0] = [3.14]
+            // 必须递归判断, 否则上面的 case 有问题
+            // return positional != null && size == 0 && eltType == UNKNOWN;
+            if (positional == null) {
+                return false;
+            } else if (eltType == UNKNOWN) {
+                // []
+                return size == 0;
+            } else if (eltType instanceof VectorType) {
+                // [[]], [[[]]], [[],[]]
+                return ((VectorType) eltType).isEmptyLiteral();
+            } else {
+                return false;
+            }
         }
 
         public Value get(Location loc, int idx) {
@@ -515,6 +533,7 @@ public interface Type {
             this.env = env;
         }
 
+        @SuppressWarnings("AliControlFlowStatementWithoutBraces")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -554,6 +573,7 @@ public interface Type {
         public final @NotNull FunDef def;
         public final @NotNull Scope props;
         public final @NotNull Scope env;
+        @Nullable Runnable fillParamRetType;
 
         private FunType(@NotNull FunDef def, @NotNull Scope props, @NotNull Scope env) {
             this.def = def;
@@ -561,6 +581,7 @@ public interface Type {
             this.env = env;
         }
 
+        @SuppressWarnings("AliControlFlowStatementWithoutBraces")
         @Override
         public boolean equals(Object o) {
             // return Equals.typeEquals(this, o);
@@ -626,10 +647,22 @@ public interface Type {
                 return ANY;
             } else if (!containsLit && subtype(u, v)) {
                 // return v;
-                return Literal.clear(v);
+                // 特殊处理
+                if (Type.isEmptyVectorLiteral(v)) {
+                    // let a:Int[][] = [[], []] 特殊处理空数组, clear 之后就没 positional 了
+                    // todo 或者 clear 不清除 positional
+                    return v;
+                } else {
+                    // 3 | 4
+                    return Literal.clear(v);
+                }
             } else if (!containsLit && subtype(v, u)) {
                 // return u;
-                return Literal.clear(u);
+                if (Type.isEmptyVectorLiteral(u)) {
+                    return u;
+                } else {
+                    return Literal.clear(u);
+                }
             } else {
                 return new UnionType(u, v);
             }

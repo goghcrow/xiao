@@ -100,9 +100,6 @@ import * from IO
 
     assert a == 42 && b == 42 && c == "str"
 
-    // todo 支持
-    // let f111 = (): ((a: Int, b:Str) => (Int, Str)) => (a, b) => (42, "Hello World")
-
 
     // 声明返回 fun 的 fun
     // 字面量声明返回值类型需要括号，否则会有歧义
@@ -145,7 +142,7 @@ import * from IO
 }
 
 
-// todo 有歧义的需要加括号
+// 有歧义的需要加括号
 (): (a: Int) => Str => (i: Int) => "str"
 (): ((a:Int,b:Int)=>Int, (a:Int,b:Int)=>Int) => ((a:Int,b:Int)=>1, (a:Int,b:Int)=>2)
 (): ((a: Int, b:Str) => (Int, Str)) => (a: Int, b: Str) => (42, "Hello World")
@@ -186,10 +183,18 @@ fun(i: Int, s: Str) = Int
 
 
 {
+    let (A, B) = (record { mut name: Int }, record { name: Int })
+    let mut (a, b) = (A(42), B(42))
+    b = a // mut 可以复制给 immutable
+    debugger a = b // immutable 不可以赋值给 mutable
+    // a.name = 100 实际把 b.name 改了...
+}
+
+
+{
     let A = record { name: Float }
     let B = record { mut name: Int}
-    debugger let f = (a: A) => a.name = 42
-    // f(B(42))
+    /*debugger*/ let f = (a: A) => a.name = 42 // 因为没有被调用过, 会有 warning
 }
 {
     let A = record { mut name: Float }
@@ -204,4 +209,11 @@ fun(i: Int, s: Str) = Int
     let f = (id: ID) => id
     f([id: 42, name: "xiao"])
     debugger f([id: 1, name: "xiao"])
+}
+
+{
+    let a: Int[] = []
+    let b: Int[][] = [[],[]]
+    let c: Int[][][] = [[[]],[[]]]
+    IO.println(c)
 }

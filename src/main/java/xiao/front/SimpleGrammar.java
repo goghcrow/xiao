@@ -7,7 +7,6 @@ import xiao.misc.Location;
 import java.util.*;
 
 import static xiao.front.Ast.Operator;
-import static xiao.front.Ast.id;
 import static xiao.front.Parser.Led;
 import static xiao.front.Parser.Nud;
 import static xiao.front.TokenType.*;
@@ -130,6 +129,7 @@ public class SimpleGrammar implements Grammar {
         infixRight(ARROW, (p, expr, tok) -> p.funParser.singleParamArrowFn(expr, tok));
     }
 
+    @Override
     public Nud prefixNud(@NotNull Token tok) {
         Nud nud = prefix.get(tok.type);
         if (nud == null) {
@@ -148,6 +148,7 @@ public class SimpleGrammar implements Grammar {
         return nud;
     }
 
+    @Override
     public Led infixLed(@NotNull Token tok) {
         Led led = infix.get(tok.type);
         if (led == null) {
@@ -160,6 +161,7 @@ public class SimpleGrammar implements Grammar {
         return led;
     }
 
+    @Override
     public int infixLbp(@NotNull Token tok) {
         return lbps.getOrDefault(tok.type, 0);
     }

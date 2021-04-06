@@ -8,11 +8,11 @@ import xiao.misc.Location;
 import java.util.List;
 import java.util.Objects;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.ID_FALSE;
 import static xiao.Constant.ID_TRUE;
 import static xiao.ToString.stringfy;
 import static xiao.Type.RecordType;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng
@@ -65,6 +65,7 @@ public interface Value {
             return value ? FALSE : TRUE;
         }
 
+        @Override
         public String toString() {
             return value ? ID_TRUE : ID_FALSE;
         }
@@ -81,6 +82,7 @@ public interface Value {
             return Math.toIntExact(value);
         }
 
+        @SuppressWarnings("AliControlFlowStatementWithoutBraces")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -106,6 +108,7 @@ public interface Value {
             this.value = value;
         }
 
+        @SuppressWarnings("AliControlFlowStatementWithoutBraces")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -132,6 +135,7 @@ public interface Value {
             this.value = value;
         }
 
+        @SuppressWarnings("AliControlFlowStatementWithoutBraces")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

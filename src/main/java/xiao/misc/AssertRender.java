@@ -67,23 +67,29 @@ public class AssertRender {
         for (int i = 0; i < valSz; i++) {
             AssertValueRecord.Val value = vals.get(i);
             int startColumn = value.col;
-            if (startColumn < 1) continue; // skip values with unknown source position
+            if (startColumn < 1) {
+                continue; // skip values with unknown source position
+            }
 
             // if multiple values are associated with the same column, only
             // render the value which was recorded last (i.e. the value
             // corresponding to the outermost expression)
             AssertValueRecord.Val next = i + 1 < valSz ? vals.get(i + 1) : null;
-            if (next != null && next.col == startColumn) continue;
+            if (next != null && next.col == startColumn) {
+                continue;
+            }
 
             String str = value.v.toString();
-            if (str == null) continue; // null signals the value shouldn't be rendered
+            if (str == null) {
+                continue; // null signals the value shouldn't be rendered
+            }
 
             String[] strs = str.split("\r\n|\r|\n");
             int endColumn = strs.length == 1 ?
                     startColumn + str.length() : // exclusive
                     Integer.MAX_VALUE; // multi-line strings are always placed on new lines
 
-            for (int j = 1; j < lines.size(); j++)
+            for (int j = 1; j < lines.size(); j++) {
                 if (endColumn < startColumns.get(j)) {
                     placeString(lines.get(j), str, startColumn);
                     startColumns.set(j, startColumn);
@@ -91,8 +97,11 @@ public class AssertRender {
                 } else {
                     placeString(lines.get(j), "|", startColumn);
                     if (j > 1) // make sure that no values are ever placed on empty line
+                    {
                         startColumns.set(j, startColumn + 1); // + 1: no whitespace required between end of value and "|"
+                    }
                 }
+            }
 
             // value could not be placed on existing lines, so place it on new line(s)
             for (String s : strs) {

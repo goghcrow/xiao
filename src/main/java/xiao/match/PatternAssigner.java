@@ -5,8 +5,8 @@ import xiao.Evaluator;
 import xiao.Scope;
 import xiao.Value;
 
-import static xiao.front.Ast.*;
 import static xiao.Value.*;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng

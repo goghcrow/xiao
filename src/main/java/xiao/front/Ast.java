@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiao.Scope;
 import xiao.misc.Location;
+import xiao.misc.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public interface Ast {
         return new Operator(loc, fixity, precedence, operator);
     }
 
-    static Import importStmt(Location loc, Map<Id, Id> aliasMap, Node from) {
+    static Import importStmt(Location loc, List<Pair<Id, Id>> aliasMap, Node from) {
         return new Import(loc, aliasMap, from);
     }
 
@@ -355,10 +356,10 @@ public interface Ast {
     }
 
     class Import extends Node {
-        public final Map<Id, Id> aliasMap;
+        public final List<Pair<Id, Id>> aliasMap;
         public final Node from;
 
-        private Import(Location loc, Map<Id, Id> aliasMap, Node from) {
+        private Import(Location loc, List<Pair<Id, Id>> aliasMap, Node from) {
             this.aliasMap = aliasMap;
             this.from = from;
             this.loc = loc;

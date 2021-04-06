@@ -6,12 +6,13 @@ import xiao.Scope;
 import xiao.Value;
 import xiao.misc.Error;
 
-import static xiao.front.Ast.Str;
-import static xiao.front.Ast.*;
 import static xiao.Constant.ID_FALSE;
 import static xiao.Constant.ID_TRUE;
-import static xiao.Type.*;
+import static xiao.Type.subtype;
+import static xiao.Type.typeof;
 import static xiao.Value.*;
+import static xiao.front.Ast.Str;
+import static xiao.front.Ast.*;
 
 /**
  * 模式匹配

@@ -62,6 +62,7 @@ public class ScopedGrammar extends SimpleGrammar {
         return clearTokenTypes.size();
     }
 
+    @Override
     public Nud prefixNud(@NotNull Token tok) {
         Nud nud = prefix.get(tok.type);
         if (nud != null) {
@@ -73,6 +74,7 @@ public class ScopedGrammar extends SimpleGrammar {
         }
     }
 
+    @Override
     public Led infixLed(@NotNull Token tok) {
         Led led = infix.get(tok.type);
         if (led != null) {
@@ -84,6 +86,7 @@ public class ScopedGrammar extends SimpleGrammar {
         }
     }
 
+    @Override
     public int infixLbp(@NotNull Token tok) {
         Integer lbp = lbps.get(tok.type);
         if (lbp != null) {

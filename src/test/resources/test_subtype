@@ -140,8 +140,21 @@
 
 // 深度子类型
 
-// mut
+// immutable <: mutable 不成立
+                // let (A, B) = (record { mut name: Int }, record { name: Int })
+                // let mut (a, b) = (A(42), B(42))
+                // b = a // mut 可以复制给 immutable
+                // debugger a = b // immutable 不可以赋值给 mutable
+                // a.name = 100 实际把 b.name 改了...
 
+// mut 域不变
+             // 当域 mutable 与数组一样对待, 强制要求不变
+             // e.g. 如果 (record {mut x: int}) <: (record {mut x: float}) 成立
+             // let a : (record {mut int}) = ({1})
+             // let b : (record {mut float}) = a
+             // b[0].x = 3.14
+             // a[0].x 类型错误, mut 域不构成 subtype 关系
+             // depth subtyping 深度子类型, 只能用于 immutable 域
 
 // mixed
 
@@ -152,8 +165,16 @@
     // funtype <: funtype
     // ============
 
+    // () → (Any, Any) → (42, "Hello World")
+    (): ((a: Int, b:Str) => (Int, Str)) => (a, b) => (42, "Hello World")
+    // 实际上: (Any, Any) → (42, "Hello World") 是 (Ibt, Str) → (Ibt, Str) 的子类型
+    let a = (a, b) => (42, "Hello World")
+    let b: (a: Int, b:Str) => (Int, Str) = a
 
-// todo.........
+
+
+
+    // todo
 
 
     {

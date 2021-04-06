@@ -2,23 +2,20 @@ package xiao;
 
 import org.jetbrains.annotations.NotNull;
 import xiao.front.Ast;
-import xiao.misc.AssertInterpreter;
 import xiao.front.Literals;
 import xiao.match.Matchers;
 import xiao.misc.Error;
-import xiao.misc.Helper;
-import xiao.misc.Location;
+import xiao.misc.*;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import static xiao.front.Ast.Str;
-import static xiao.front.Ast.*;
 import static xiao.Constant.*;
 import static xiao.Copy.copyType;
 import static xiao.Type.*;
 import static xiao.Value.*;
-import static xiao.misc.Helper.lists;
+import static xiao.front.Ast.Str;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng
@@ -556,9 +553,9 @@ public class Interpreter implements Visitor<Scope, Value>, Evaluator<Scope, Valu
         boolean hasStar = false;
         Set<String> imported = new HashSet<>();
 
-        for (Entry<Id, Id> it : import1.aliasMap.entrySet()) {
-            Id key = it.getKey();
-            Id val = it.getValue();
+        for (Pair<Id, Id> it : import1.aliasMap) {
+            Id key = it.fst;
+            Id val = it.snd;
             if (key.name.equals(IMPORT_STAR)) {
                 hasStar = true;
             } else {

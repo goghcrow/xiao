@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static xiao.Constant.ID_RETURN;
+import static xiao.Constant.KEY_MUT;
 import static xiao.Stack.MonoStack;
 import static xiao.Stack.valueStack;
 import static xiao.Type.*;
@@ -100,22 +101,21 @@ class ToString {
                 if (t == null) {
                     t = rt.props.lookupType(k);
                 }
-                // Object mut = rt.props.lookupLocalProp(k, KEY_MUT);
-                // assert t != null;
+                Object mut = rt.props.lookupLocalProp(k, KEY_MUT);
                 if (t == null) {
                     // 解释器
                     if (first) {
-                        buf/*.append(TRUE == mut ? "mut " : "")*/.append(k).append(":").append("???");
+                        buf.append(TRUE == mut ? "mut " : "").append(k).append(":").append("???");
                         first = false;
                     } else {
-                        buf.append(", ")/*.append(TRUE == mut ? "mut " : "")*/.append(k).append(":").append("???");
+                        buf.append(", ").append(TRUE == mut ? "mut " : "").append(k).append(":").append("???");
                     }
                 } else {
                     if (first) {
-                        buf/*.append(TRUE == mut ? "mut " : "")*/.append(k).append(":").append(stringfy(t, st));
+                        buf.append(TRUE == mut ? "mut " : "").append(k).append(":").append(stringfy(t, st));
                         first = false;
                     } else {
-                        buf.append(", ")/*.append(TRUE == mut ? "mut " : "")*/.append(k).append(":").append(stringfy(t, st));
+                        buf.append(", ").append(TRUE == mut ? "mut " : "").append(k).append(":").append(stringfy(t, st));
                     }
                 }
             }

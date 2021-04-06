@@ -9,8 +9,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import static xiao.front.Ast.Call;
-import static xiao.misc.Helper.join;
-import static xiao.misc.Helper.log;
 
 /**
  * @author chuxiaofeng

@@ -6,9 +6,9 @@ import xiao.Voids;
 import xiao.misc.Error;
 import xiao.misc.Location;
 
-import static xiao.front.Ast.*;
 import static xiao.Type.*;
 import static xiao.Value.VOID;
+import static xiao.front.Ast.*;
 
 /**
  * PatternBinder 的 typecheck

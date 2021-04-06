@@ -5,9 +5,9 @@ import xiao.Value;
 import xiao.misc.Error;
 import xiao.misc.Location;
 
+import static xiao.Value.*;
 import static xiao.front.Ast.Str;
 import static xiao.front.Ast.*;
-import static xiao.Value.*;
 
 /**
  * 解构赋值

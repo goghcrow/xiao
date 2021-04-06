@@ -17,11 +17,11 @@ class ControlFlow extends RuntimeException {
         super(null, null, true, false);
     }
 
-    static Continue Continue() {
+    static @NotNull Continue Continue() {
         return new Continue();
     }
 
-    static Break Break() {
+    static @NotNull Break Break() {
         return new Break();
     }
 

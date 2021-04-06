@@ -5,10 +5,10 @@ import xiao.*;
 import xiao.misc.Error;
 import xiao.misc.Location;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.KEY_MUT;
 import static xiao.Type.*;
-import static xiao.Value.*;
+import static xiao.Value.FALSE;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng

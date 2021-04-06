@@ -5,10 +5,10 @@ import xiao.Evaluator;
 import xiao.Scope;
 import xiao.Value;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.ID_FALSE;
 import static xiao.Constant.ID_TRUE;
 import static xiao.Value.VOID;
+import static xiao.front.Ast.*;
 
 
 /**

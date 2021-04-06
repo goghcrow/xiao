@@ -4,9 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import xiao.*;
 import xiao.misc.Error;
 
-import static xiao.front.Ast.*;
 import static xiao.Constant.KEY_MUT;
 import static xiao.Value.*;
+import static xiao.front.Ast.*;
 
 /**
  * @author chuxiaofeng

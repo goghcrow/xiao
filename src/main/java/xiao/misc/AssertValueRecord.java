@@ -30,7 +30,9 @@ class AssertValueRecord {
 
     public Value rec(Value v, int col) {
         for (Val it : vals) {
-            if (it.col == col) return rec(v, col + 1);
+            if (it.col == col) {
+                return rec(v, col + 1);
+            }
         }
         vals.add(new Val(v, col));
         return v;

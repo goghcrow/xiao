@@ -237,14 +237,17 @@ let f = (a: Int|Str) => {
 }
 
 {
-    let f = (a: (Int|Str)[]) => append(a, "Hello")
+    let f = (a: (Int|Str)[]) => {
+        append(a, "Hello")
+        append(a, 1)
+        debugger append(a, 3.14)
+    }
     f([])
     debugger f([1])
+
     let args: (Int|Str)[] = []
     append(args, 1)
     f(args)
-
-    // todo !!! 字面量可以穿, 但是引用不行...
 }
 
 

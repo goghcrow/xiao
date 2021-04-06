@@ -1,10 +1,10 @@
-package xiao;
+package xiao.playground;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings({"rawtypes", "UnnecessaryLocalVariable", "unchecked", "ConstantConditions", "StatementWithEmptyBody"})
-public class Test {
+public class ExtendsSuperTest {
 
     // 泛型上界 extends 下界 super
 

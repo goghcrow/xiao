@@ -1,5 +1,7 @@
 package xiao;
 
+import xiao.misc.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,35 +50,25 @@ class Stack {
         }
     }
 
-    static class Pair {
-        final Value fst;
-        final Value sed;
-
-        Pair(Value fst, Value sed) {
-            this.fst = fst;
-            this.sed = sed;
-        }
-    }
-
     static class PairStack {
 
-        final List<Pair> stack = new ArrayList<>();
+        final List<Pair<Value, Value>> stack = new ArrayList<>();
 
         void push(Value fst, Value sed) {
-            stack.add(new Pair(fst, sed));
+            stack.add(new Pair<>(fst, sed));
         }
 
-        void pop(Value fst, Value sed) {
-            Pair removed = stack.remove(stack.size() - 1);
+        void pop(Value fst, Value snd) {
+            Pair<Value, Value> removed = stack.remove(stack.size() - 1);
             assert fst == removed.fst;
-            assert sed == removed.sed;
+            assert snd == removed.snd;
         }
 
         boolean contains(Value fst, Value sed) {
-            for (Pair p : stack) {
-                if (p.fst == fst && p.sed == sed) {
+            for (Pair<Value, Value> p : stack) {
+                if (p.fst == fst && p.snd == sed) {
                     return true;
-                } else if (p.fst == sed && p.sed == fst) {
+                } else if (p.fst == sed && p.snd == fst) {
                     return true;
                 }
             }
