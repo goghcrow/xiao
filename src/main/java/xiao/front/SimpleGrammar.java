@@ -103,9 +103,7 @@ public class SimpleGrammar implements Grammar {
         prefix(LEFT_PAREN, (p, tok) -> p.leftParen(tok));
 
         prefix(TYPE, (p, tok) -> p.bindParser.type(tok));
-        prefix(TYPEREC, (p, tok) -> p.bindParser.typeRecursive(tok));
         prefix(LET, (p, tok) -> p.bindParser.define(tok));
-        prefix(LETREC, (p, tok) -> p.bindParser.defineRecursive(tok));
         prefix(FUN, (p, tok) -> p.funParser.defFun(tok));
         prefix(RECORD, (p, tok) -> p.recordParser.record(tok));
 

@@ -404,8 +404,8 @@ fun(i: Int, s: Str) = Int
 ```
 // 递归声明类型
 {
-    // letrec (A, B) = (B, A)
-    typerec (A, B) = (
+    // let rec (A, B) = (B, A)
+    type rec (A, B) = (
         (42, B),
         (3.14, A)
     )
@@ -413,7 +413,7 @@ fun(i: Int, s: Str) = Int
 
 {
     // 1. 递归函数必须写返回值
-    // 2. 相互递归函数如果不用 letrec 声明, 没法推导类型
+    // 2. 相互递归函数如果不用 let rec 声明, 没法推导类型
     let is_even = (n: Int): Bool => n == 0 || is_odd(n - 1)
     let is_odd = (n: Int): Bool => n != 0 && is_even(n - 1)
     assert is_even(0) && is_odd(1) && is_even(2) && is_odd(3) && is_even(4) && is_odd(5)
@@ -421,7 +421,7 @@ fun(i: Int, s: Str) = Int
 
 {
     // Mutually Recursive
-    letrec (A, B) = (
+    let rec (A, B) = (
         record {
             b: B
         },
@@ -429,7 +429,7 @@ fun(i: Int, s: Str) = Int
             a: A
         }
     )
-    letrec (a, b) = (
+    let rec (a, b) = (
         A(b),
         B(a)
     )
@@ -438,13 +438,13 @@ fun(i: Int, s: Str) = Int
 
     // tuple
     {
-        letrec (X, Y) = ( (X, Y), (Y, X) )
+        let rec (X, Y) = ( (X, Y), (Y, X) )
         assert X[0] == X && X[1] == Y && Y[0] == Y && Y[1] == X
     }
 
     // vec
     {
-        letrec (X, Y) = ( [X, Y], [Y, X] )
+        let rec (X, Y) = ( [X, Y], [Y, X] )
         assert X[0] == X && X[1] == Y && Y[0] == Y && Y[1] == X
     }
 }
@@ -689,7 +689,7 @@ printId("202")
 
 ```
 {
-    letrec (Tree, Node) = (
+    let rec (Tree, Node) = (
         Node | (),
         record {
             left: Tree = ()
@@ -716,7 +716,7 @@ printId("202")
 
 
 {
-    letrec (List, Node) = (
+    let rec (List, Node) = (
         Node | (),
         record {
             next: List
@@ -739,7 +739,7 @@ printId("202")
 {
     fun ListOf(T) {
         module {
-            letrec (List, Node) = (
+            let rec (List, Node) = (
                 Node|(),
                 record {
                     val: T

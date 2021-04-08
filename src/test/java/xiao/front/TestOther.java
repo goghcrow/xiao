@@ -1,13 +1,12 @@
 package xiao.front;
 
 import org.junit.Test;
-import xiao.front.Lexicon;
 
 import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static xiao.front.Lexicon.*;
+import static xiao.front.Lexicon.StrRule;
 import static xiao.front.TokenType.NAME;
 
 /**

@@ -7,6 +7,7 @@ import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.stream.Collectors.joining;
 
 /**
  * @author chuxiaofeng
@@ -70,6 +71,19 @@ public class Error extends RuntimeException {
         }
     }
 
+    public static class DiagnosisSummary extends Type {
+        final List<Diagnosis> diagnosisList;
+
+        public DiagnosisSummary(List<Diagnosis> errLst) {
+            super(Location.None, msg(errLst));
+            this.diagnosisList = errLst;
+        }
+
+        static String msg(List<Diagnosis> errLst) {
+            return errLst.stream().map(Diagnosis::toString).collect(joining("\n\n"));
+        }
+    }
+
     public static class Runtime extends Error {
         public Runtime(Location loc, String msg) {
             super(loc, msg);
@@ -90,6 +104,10 @@ public class Error extends RuntimeException {
 
     public static Error type(@NotNull Location loc, @NotNull String msg) {
         return new Type(loc, msg);
+    }
+
+    public static DiagnosisSummary diagnosisSummary(List<Diagnosis> errLst) {
+        return new DiagnosisSummary(errLst);
     }
 
     public static Error runtime(@NotNull Location loc,@NotNull String msg) {

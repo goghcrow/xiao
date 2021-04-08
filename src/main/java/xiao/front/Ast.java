@@ -108,8 +108,9 @@ public interface Ast {
 
     static Define defineRecursive(@NotNull Location loc,
                                   @NotNull Node pattern,
-                                  @NotNull Node init) {
-        return new Define(loc, pattern, null, init, false, true);
+                                  @NotNull Node init,
+                                  boolean mut) {
+        return new Define(loc, pattern, null, init, mut, true);
     }
 
     static Define define(@NotNull Location loc,

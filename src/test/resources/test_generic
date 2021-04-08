@@ -131,7 +131,7 @@
 
 // !!! 比上面 ListOf 的声明方式靠谱
 {
-    letrec (List, Node) = (
+    let rec (List, Node) = (
         Node | (),
         record {
             next: List
@@ -156,7 +156,7 @@
 {
     fun ListOf(T) {
         module {
-            letrec (List, Node) = (
+            let rec (List, Node) = (
                 Node|(),
                 record {
                     val: T
@@ -233,7 +233,7 @@
     }
     */
 
-    letrec (Tree, Node) = (
+    let rec (Tree, Node) = (
         Node | (),
         record {
             left: Tree = ()

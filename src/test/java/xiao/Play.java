@@ -2,12 +2,12 @@ package xiao;
 
 
 import org.junit.Test;
-import xiao.Value;
-import xiao.front.Ast;
 
 import static org.junit.Assert.assertTrue;
-import static xiao.Boot.*;
-import static xiao.Type.*;
+import static xiao.Boot.eval;
+import static xiao.Boot.typecheck;
+import static xiao.Type.BoolType;
+import static xiao.Type.IntType;
 import static xiao.misc.Helper.path;
 import static xiao.misc.Helper.read;
 
@@ -20,10 +20,9 @@ public class Play {
         // String s = "(  (f:(_:Int,_:Int)=>Int, a:Int, b:Int) => f(a, b)  )  ((a: Int, b: Int) => a + b, 1, 2) == 3";
         // String s = "((f:(_:Int,_:Int)=>Int, a:Int, b:Int) => f(a, b))((a: Int, b: Int) => a + b, 1, 2) == 3";
 //        String s = "let a:Int[][][] = [[[]],[[]]] a";
-         String s = "let a:Int[][] = [[],[]] a";
+         String s = "let a:Int[][] = [[],[3]] a";
         Value eval = typecheck(s);
         System.out.println(eval);
-
     }
 
     @Test public void test_basic() { test(); }
@@ -55,7 +54,6 @@ public class Play {
     Value evalResource(String resourcePath) {
         return eval(read(path(resourcePath)));
     }
-
 
     @Test
     public void test_literal_record_literal() {

@@ -685,6 +685,14 @@ public class Parser {
 
         public Node type(Token type) {
             tryEatLines();
+            if (lexer.tryEat(REC) != null) {
+                return typeRecursive(type);
+            } else {
+                return type1(type);
+            }
+        }
+
+        Typedef type1(Token type) {
             // 因为可以自定义操作符, 所以这里是可以是名字或者操作符
             Token tok = lexer.tryEat(NAME);
             if (tok == null) {
@@ -703,7 +711,7 @@ public class Parser {
             return Ast.typedef(range(type.loc, init.loc), id, init);
         }
 
-        public Node typeRecursive(Token def) {
+        Node typeRecursive(Token def) {
             tryEatLines();
             TupleLiteral lhs = patternParser.tuplePattern(false);
             for (Node el : lhs.elements) {
@@ -724,7 +732,7 @@ public class Parser {
             return Ast.typedefRecursive(range(def.loc, val.loc), lhs, val);
         }
 
-        public Node defineRecursive(Token def) {
+        public Node defineRecursive(Token def, boolean mut) {
             tryEatLines();
             TupleLiteral lhs = patternParser.tuplePattern(false);
             for (Node el : lhs.elements) {
@@ -742,17 +750,24 @@ public class Parser {
             if (lhs.elements.size() != rhs.elements.size()) {
                 throw Error.syntax(range(lhs.loc, rhs.loc), "数量不匹配");
             }
-            return Ast.defineRecursive(range(def.loc, val.loc), lhs, val);
+            return Ast.defineRecursive(range(def.loc, val.loc), lhs, val, mut);
         }
 
         public Node define(Token def) {
             tryEatLines();
+            boolean rec = lexer.tryEat(REC) != null;
+            tryEatLines();
             boolean mut = lexer.tryEat(MUT) != null;
             tryEatLines();
-            if (patternParser.isDestructPattern()) {
-                return definePattern(def, mut);
+
+            if (rec) {
+                return defineRecursive(def, mut);
             } else {
-                return defineId(def, mut);
+                if (patternParser.isDestructPattern()) {
+                    return definePattern(def, mut);
+                } else {
+                    return defineId(def, mut);
+                }
             }
         }
 

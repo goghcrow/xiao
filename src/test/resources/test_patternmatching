@@ -20,7 +20,7 @@
 }
 
 {
-    let rec_sz = rec => match rec {
+    let rec_sz = recd => match recd {
         case [:] -> 0
         // 数量为 1，为 a, 且绑定到 a
         case [a:a] -> a
@@ -54,7 +54,7 @@
 
 {
     let tuple = ( "subscript", )
-    let rec = [ val: "attribute" ]
+    let recd = [ val: "attribute" ]
     let a = 100
 
     fun test(val) = match val {
@@ -62,15 +62,15 @@
         case 42.0 -> 1.0            // float 字面量
         case "hello" -> "world"     // str 字面量
         case () -> "empty tuple"      // empty tuple
-        case [:] -> "empty rec"      // empty record
+        case [:] -> "empty recd"      // empty record
         case (3.14, _, a) -> a      // tuple + wildcards + bind
         case [id:1, val:val] -> val     // record + bind
         case 1 + a -> a             // expr
-        case tuple[0] -> tuple[0]       // 这里 tuple[0] 与 rec.val 当成表达式执行, 没有当成 bind
-        case rec.val -> rec.val
+        case tuple[0] -> tuple[0]       // 这里 tuple[0] 与 recd.val 当成表达式执行, 没有当成 bind
+        case recd.val -> recd.val
         case ("tuple", tuple[0]) -> tuple[0]
-        case (tuple[0], rec.val) -> "x"
-        case [a:tuple[0], b:rec.val] -> "y"
+        case (tuple[0], recd.val) -> "x"
+        case [a:tuple[0], b:recd.val] -> "y"
         case ("x+y", x, y) -> x + y // id bind
         // case v -> v              // 这里会永远匹配, 不会走到_ 位置
         case _ -> "default"         // wildcards
@@ -84,7 +84,7 @@
     assert test((3.14,)) == "default"
     assert test((3.14, 1)) == "default"
     assert test((3.14, 1, 42)) == 42
-    assert test([:]) == "empty rec"
+    assert test([:]) == "empty recd"
     // assert test([id:1, val:42]) == 42 // todo
     assert test([id:2, val:42]) == "default"
     assert test([id:1]) == "default"
@@ -97,7 +97,7 @@
     assert test(["tuple", 1]) == "default"
 
     assert test(tuple[0]) == tuple[0]
-    assert test(rec.val) == rec.val
-    assert test((tuple[0], rec.val)) == "x"
-    assert test([a: tuple[0], b: rec.val]) == "y"
+    assert test(recd.val) == recd.val
+    assert test((tuple[0], recd.val)) == "x"
+    assert test([a: tuple[0], b: recd.val]) == "y"
 }

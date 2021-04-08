@@ -3,8 +3,6 @@ package xiao.front;
 import org.junit.Assert;
 import org.junit.Test;
 import xiao.Value;
-import xiao.front.Ast;
-import xiao.front.Token;
 import xiao.misc.Error;
 
 import java.util.ArrayList;

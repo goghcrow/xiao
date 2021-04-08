@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiao.front.Ast;
 import xiao.match.Matchers;
-import xiao.misc.*;
 import xiao.misc.Error;
+import xiao.misc.*;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -16,7 +16,7 @@ import static xiao.Type.*;
 import static xiao.Value.*;
 import static xiao.front.Ast.Str;
 import static xiao.front.Ast.*;
-import static xiao.misc.Diagnosis.*;
+import static xiao.misc.Diagnosis.Category;
 
 /**
  * @author chuxiaofeng
@@ -52,9 +52,9 @@ public class TypeChecker implements Visitor<Scope, Value>, Evaluator<Scope, Valu
     void summary() {
         if (typeErrors.isEmpty()) {
             return;
-        }
-        for (Diagnosis d : typeErrors) {
-            Helper.log(d.toString());
+        } else {
+            // for (Diagnosis d : typeErrors) { Helper.log(d.toString()); }
+            throw Error.diagnosisSummary(typeErrors);
         }
     }
 

@@ -194,7 +194,8 @@ fun(i: Int, s: Str) = Int
 {
     let A = record { name: Float }
     let B = record { mut name: Int}
-    /*debugger*/ let f = (a: A) => a.name = 42 // 因为没有被调用过, 会有 warning
+    let f = (a: A) => a.name = 42
+    debugger f(A(3.14))
 }
 {
     let A = record { mut name: Float }

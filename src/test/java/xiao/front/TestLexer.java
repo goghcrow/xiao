@@ -2,11 +2,7 @@ package xiao.front;
 
 
 import org.junit.Test;
-import xiao.front.Lexer;
 import xiao.front.Lexer.TokenNode;
-import xiao.front.Lexicon;
-import xiao.front.Token;
-import xiao.front.TokenType;
 import xiao.misc.Error;
 
 import java.util.ArrayList;

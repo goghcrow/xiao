@@ -89,7 +89,7 @@ public class Lexicon implements Iterable<Rule> {
 
         TokenType[] keywords = {
                 PREFIX, INFIXL, INFIXR, INFIXN,
-                TYPE, TYPEREC, LET, LETREC, MUT, FUN,
+                TYPE, LET, REC, MUT, FUN,
                 RECORD, EXTENDS,
                 IF, ELSE,
                 FOR, DO, WHILE,

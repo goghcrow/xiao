@@ -109,9 +109,8 @@ final public class TokenType {
     public final static TokenType CASE = new TokenType("case");
 
     public final static TokenType TYPE = new TokenType("type");
-    public final static TokenType TYPEREC = new TokenType("typerec");
     public final static TokenType LET = new TokenType("let");
-    public final static TokenType LETREC = new TokenType("letrec");
+    public final static TokenType REC = new TokenType("rec");
     public final static TokenType MUT = new TokenType("mut");
     public final static TokenType FUN = new TokenType("fun");
 

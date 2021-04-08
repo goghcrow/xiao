@@ -3,8 +3,8 @@ debugger let a = 1
 
 debugger let (a, b) = (1, 2)
 debugger let (b, b) = (1, 2)
-debugger letrec (c, c) = (1, 1)
-letrec (x, y) = (y, x)
+debugger let rec (c, c) = (1, 1)
+let rec (x, y) = (y, x)
 
 let mut (m, n) = (1, 2)
 (m, n) = (n, m)
